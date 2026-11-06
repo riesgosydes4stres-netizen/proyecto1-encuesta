@@ -8,6 +8,20 @@
       "when": 1793925611536,
       "tag": "0000_profiles_and_surveys",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793926657826,
+      "tag": "0001_publish_surveys_and_responses",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793926745071,
+      "tag": "0002_response_media_column",
+      "breakpoints": true
     }
   ]
 }

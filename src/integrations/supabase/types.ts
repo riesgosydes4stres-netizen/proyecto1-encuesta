@@ -35,11 +35,59 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_responses: {
+        Row: {
+          answers: Json
+          created_at: string
+          email_count: number
+          household_code: string
+          id: string
+          media: Json
+          owner_id: string
+          share_token: string
+          submitted_by: string | null
+          survey_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          email_count?: number
+          household_code?: string
+          id?: string
+          media?: Json
+          owner_id: string
+          share_token: string
+          submitted_by?: string | null
+          survey_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          email_count?: number
+          household_code?: string
+          id?: string
+          media?: Json
+          owner_id?: string
+          share_token?: string
+          submitted_by?: string | null
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       surveys: {
         Row: {
           created_at: string
           description: string
           id: string
+          is_published: boolean
           questions: Json
           title: string
           updated_at: string
@@ -49,6 +97,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_published?: boolean
           questions?: Json
           title?: string
           updated_at?: string
@@ -58,6 +107,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_published?: boolean
           questions?: Json
           title?: string
           updated_at?: string

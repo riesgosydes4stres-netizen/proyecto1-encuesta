@@ -1,8 +1,10 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import type { Question, SurveyDoc } from "@/lib/survey-parser";
-
-type Answer = string | string[] | Record<number, string>;
+import type { Answer, Answers } from "@/lib/vulnerability";
+import { splitMedia } from "@/lib/vulnerability";
+import { PhotoInput, SignaturePad } from "./MediaInputs";
+import { ResultsView } from "./ResultsView";
 
 /** Splits a trailing "(ayuda)" from the question text, like the original ay(). */
 function splitHelp(t: string): [string, string] {
@@ -30,10 +32,19 @@ function CalendarIcon() {
   );
 }
 
-export function SurveyForm({ doc, logoStyle }: { doc: SurveyDoc; logoStyle?: React.CSSProperties }) {
+interface Props {
+  doc: SurveyDoc;
+  logoStyle?: React.CSSProperties;
+  /** Live mode: saves the answers. Without it the form is a preview that saves nothing. */
+  onSubmit?: (answers: Answers) => Promise<void>;
+}
+
+export function SurveyForm({ doc, logoStyle, onSubmit }: Props) {
+  const live = !!onSubmit;
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [bad, setBad] = useState<Set<string>>(new Set());
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState<{ at: string } | null>(null);
+  const [sending, setSending] = useState(false);
 
   const visible = useMemo(() => doc.questions.filter((q) => q.text.trim()), [doc.questions]);
   const required = visible.filter((q) => q.req);
@@ -62,7 +73,7 @@ export function SurveyForm({ doc, logoStyle }: { doc: SurveyDoc; logoStyle?: Rea
     });
   };
 
-  const onSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const missing = required.filter((q) => !isAnswered(q, answers[q.id])).map((q) => q.id);
     setBad(new Set(missing));
@@ -71,26 +82,36 @@ export function SurveyForm({ doc, logoStyle }: { doc: SurveyDoc; logoStyle?: Rea
       toast("Faltan preguntas obligatorias.");
       return;
     }
-    setDone(true);
+    if (onSubmit) {
+      setSending(true);
+      try {
+        await onSubmit(answers);
+      } catch (err) {
+        toast(err instanceof Error ? err.message : "No se pudieron enviar las respuestas.");
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
+    setDone({ at: new Date().toISOString() });
   };
 
-  if (done) {
+  if (done && !live) {
+    const { answers: plain, media } = splitMedia(visible, answers);
     return (
       <div className="sv">
         <div className="sv-ok">
           <h3>¡Gracias por responder!</h3>
-          <p>Sus respuestas fueron recibidas. (Vista previa: aquí no se guardan.)</p>
-          <button
-            className="btn navy"
-            type="button"
-            onClick={() => {
-              setAnswers({});
-              setDone(false);
-            }}
-          >
-            Volver a la encuesta
-          </button>
+          <p>Vista previa: así se verán los resultados y el informe. Aquí no se guarda nada.</p>
         </div>
+        <ResultsView
+          data={{ title: doc.title, desc: doc.desc, questions: visible, answers: plain, media, createdAt: done.at, preview: true }}
+          actions={
+            <button className="btn line" type="button" onClick={() => { setAnswers({}); setDone(null); }}>
+              Volver a la encuesta
+            </button>
+          }
+        />
       </div>
     );
   }
@@ -116,7 +137,7 @@ export function SurveyForm({ doc, logoStyle }: { doc: SurveyDoc; logoStyle?: Rea
           </span>
         </div>
       )}
-      <form noValidate onSubmit={onSubmit} onReset={() => { setAnswers({}); setBad(new Set()); }}>
+      <form noValidate onSubmit={(e) => void handleSubmit(e)} onReset={() => { setAnswers({}); setBad(new Set()); }}>
         {groups.map((g, gi) => (
           <div className="sv-s" key={gi}>
             {g.sec && <h3 className="es">{g.sec}</h3>}
@@ -133,13 +154,21 @@ export function SurveyForm({ doc, logoStyle }: { doc: SurveyDoc; logoStyle?: Rea
                     ? "Seleccione una opción."
                     : q.type === "grid"
                       ? "Marque una opción en cada fila."
+                      : q.type === "photo"
+                        ? "Tome la foto con autorización de la persona. Solo la verá el equipo responsable."
+                        : q.type === "signature"
+                          ? "La persona encuestada firma en el recuadro."
                       : q.type === "scale"
                         ? "1 = más bajo · 5 = más alto"
                         : "");
               const a = answers[q.id];
               const str = typeof a === "string" ? a : "";
               let c: React.ReactNode;
-              if (q.type === "long")
+              if (q.type === "photo")
+                c = <PhotoInput id={id} value={str} onChange={(v) => setA(q.id, v)} />;
+              else if (q.type === "signature")
+                c = <SignaturePad key={id + (str ? "-s" : "-e")} id={id} value={str} onChange={(v) => setA(q.id, v)} />;
+              else if (q.type === "long")
                 c = <textarea className="etx" id={id} value={str} onChange={(e) => setA(q.id, e.target.value)} placeholder="Escriba su respuesta" aria-labelledby={"l" + id} />;
               else if (q.type === "grid") {
                 const g2 = (a as Record<number, string> | undefined) ?? {};
@@ -259,12 +288,13 @@ export function SurveyForm({ doc, logoStyle }: { doc: SurveyDoc; logoStyle?: Rea
           </div>
         ))}
         <div className="sv-a">
-          <button className="btn navy" type="submit">Enviar respuestas</button>
+          <button className="btn navy" type="submit" disabled={sending}>{sending ? "Enviando…" : "Enviar respuestas"}</button>
           <button className="btn line" type="reset">Borrar respuestas</button>
         </div>
       </form>
       <p className="sv-f">
-        {required.length ? "* Indica que la pregunta es obligatoria. " : ""}Vista previa: aquí las respuestas no se guardan.
+        {required.length ? "* Indica que la pregunta es obligatoria. " : ""}
+        {live ? "Sus respuestas se envían de forma segura al equipo responsable de la encuesta." : "Vista previa: aquí las respuestas no se guardan."}
       </p>
     </div>
   );

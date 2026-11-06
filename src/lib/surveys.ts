@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
-import { uid, type Question, type QuestionType, type SurveyDoc } from "./survey-parser";
+import { uid, type Dimension, type Question, type QuestionType, type SurveyDoc } from "./survey-parser";
 
 export interface SavedSurvey {
   id: string;
@@ -8,9 +8,11 @@ export interface SavedSurvey {
   description: string;
   questions: Question[];
   updated_at: string;
+  is_published: boolean;
 }
 
-const TYPES: QuestionType[] = ["short", "date", "number", "grid", "select", "long", "single", "multi", "scale"];
+const TYPES: QuestionType[] = ["short", "date", "number", "grid", "select", "long", "single", "multi", "scale", "photo", "signature"];
+const DIMS: Dimension[] = ["vivienda", "medios", "sst"];
 
 function strList(v: unknown): string[] {
   return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
@@ -35,6 +37,10 @@ export function normalizeQuestions(raw: unknown): Question[] {
         out.rows = strList(q["rows"]);
         out.cols = strList(q["cols"]);
       }
+      if (DIMS.includes(q["dim"] as Dimension)) out.dim = q["dim"] as Dimension;
+      if (Array.isArray(q["risk"])) out.risk = (q["risk"] as unknown[]).map((v) => (typeof v === "number" ? v : 50));
+      if (q["invert"] === true) out.invert = true;
+      if (q["key"] === true) out.key = true;
       return out;
     });
 }
@@ -56,14 +62,35 @@ function cleanQuestions(qs: Question[]): Question[] {
     .map(({ auto: _auto, ...q }) => q);
 }
 
-export async function listSurveys(): Promise<SavedSurvey[]> {
+export async function listSurveys(userId: string): Promise<SavedSurvey[]> {
+  // Published surveys from other people are readable too, so always filter by owner.
   const { data, error } = await supabase
     .from("surveys")
-    .select("id,title,description,questions,updated_at")
+    .select("id,title,description,questions,updated_at,is_published")
+    .eq("user_id", userId)
     .order("updated_at", { ascending: false });
   if (error) throw new Error("No se pudieron cargar sus encuestas.");
   return (data ?? []).map((r) => ({ ...r, questions: normalizeQuestions(r.questions) }));
 }
+
+export async function getOwnSurvey(userId: string, id: string): Promise<SavedSurvey | null> {
+  const { data, error } = await supabase
+    .from("surveys")
+    .select("id,title,description,questions,updated_at,is_published")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw new Error("No se pudo cargar la encuesta.");
+  return data ? { ...data, questions: normalizeQuestions(data.questions) } : null;
+}
+
+export async function setPublished(id: string, published: boolean): Promise<void> {
+  const { error } = await supabase.from("surveys").update({ is_published: published }).eq("id", id);
+  if (error) throw new Error("No se pudo cambiar el estado de la encuesta.");
+}
+
+export const surveyLink = (id: string) =>
+  (typeof window !== "undefined" ? window.location.origin : "") + "/responder/" + id;
 
 export async function saveSurvey(userId: string, doc: SurveyDoc, id: string | null): Promise<string> {
   const row = {

@@ -14,6 +14,8 @@ export const TIPOS = {
   single: "Opción única",
   multi: "Opción múltiple",
   scale: "Escala 1 a 5",
+  photo: "Foto de la persona encuestada",
+  signature: "Firma",
 };
 
 export const uid = () => "q" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -227,6 +229,14 @@ export function parse(text, fname) {
         })
         .replace(/\((desplegable|lista|lista desplegable)\)/i, () => {
           type = "select";
+          return "";
+        })
+        .replace(/\((firma)\)/i, () => {
+          type = "signature";
+          return "";
+        })
+        .replace(/\((foto|fotograf[ií]a)\)/i, () => {
+          type = "photo";
           return "";
         })
         .trim();

@@ -4,7 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EJEMPLO, iaPedido, parse, slugify, uid, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
 import { fileBaseName, readDocumentText } from "@/lib/read-document";
-import { deleteSurvey, downloadSurveyJson, listSurveys, saveSurvey, surveyFromJson } from "@/lib/surveys";
+import { deleteSurvey, downloadSurveyJson, listSurveys, saveSurvey, setPublished, surveyFromJson } from "@/lib/surveys";
+import { Link } from "@tanstack/react-router";
+import { SharePanel } from "./SharePanel";
 import { generateSurveyText } from "@/lib/ai.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { SurveyEditor } from "./SurveyEditor";
@@ -22,6 +24,8 @@ const MANUAL_TYPES: { type: QuestionType; icon: string; cls: string; title: stri
   { type: "date", icon: "▦", cls: "q-teal", title: "Fecha", sub: "Seleccionar un día" },
   { type: "number", icon: "#", cls: "q-red", title: "Número", sub: "Registrar una cantidad" },
   { type: "grid", icon: "▦", cls: "q-navy", title: "Cuadrícula", sub: "Comparar varias filas" },
+  { type: "photo", icon: "◎", cls: "q-blue", title: "Foto de la persona", sub: "Tomar o subir una fotografía" },
+  { type: "signature", icon: "✍", cls: "q-gold", title: "Firma", sub: "Firmar con el dedo o el mouse" },
 ];
 
 const scrollSoon = (el: HTMLElement | null, block: ScrollLogicalPosition = "start") =>
@@ -62,7 +66,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     return () => clearTimeout(t);
   }, []);
 
-  const saved = useQuery({ queryKey: ["surveys", user?.id], queryFn: listSurveys, enabled: !!user });
+  const saved = useQuery({ queryKey: ["surveys", user?.id], queryFn: () => listSurveys(user!.id), enabled: !!user });
 
   const saveMut = useMutation({
     mutationFn: async () => {
@@ -74,6 +78,20 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
       setCurrentId(id);
       void qc.invalidateQueries({ queryKey: ["surveys"] });
       toast("Encuesta guardada en su cuenta.");
+    },
+    onError: (e: Error) => toast(e.message),
+  });
+
+  const publishMut = useMutation({
+    mutationFn: async (next: boolean) => {
+      if (!user || !doc || !currentId) throw new Error("Primero guarde la encuesta.");
+      if (next) await saveSurvey(user.id, doc, currentId);
+      await setPublished(currentId, next);
+      return next;
+    },
+    onSuccess: (next) => {
+      void qc.invalidateQueries({ queryKey: ["surveys"] });
+      toast(next ? "Encuesta abierta: ya puede compartir el enlace o el código QR." : "Encuesta cerrada: ya no recibe respuestas.");
     },
     onError: (e: Error) => toast(e.message),
   });
@@ -258,6 +276,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
   const nr = doc ? doc.questions.filter((q) => q.req).length : 0;
   const au = doc ? doc.questions.filter((q) => q.auto && q.text.trim()) : [];
   const hasQuestions = !!doc && doc.questions.length > 0;
+  const current = currentId ? saved.data?.find((s) => s.id === currentId) : undefined;
 
   return (
     <section className="docs" id="documento" aria-label="Creador de encuestas">
@@ -375,7 +394,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
                 <li>Cada pregunta va en su línea, con número («1.») o entre signos de interrogación.</li>
                 <li>Las opciones van debajo, con guion o letra: «- Sí» o «a) Sí».</li>
                 <li>Sin opciones, la pregunta será de respuesta corta.</li>
-                <li>Al final de la pregunta puede añadir: <b>(varias)</b>, <b>(escala)</b>, <b>(párrafo)</b>, <b>(matriz)</b> (con «Filas: a | b» y «Columnas: x | y» debajo), <b>(fecha)</b>, <b>(número)</b>, <b>(desplegable)</b> o <b>*</b> si es obligatoria.</li>
+                <li>Al final de la pregunta puede añadir: <b>(varias)</b>, <b>(escala)</b>, <b>(párrafo)</b>, <b>(matriz)</b> (con «Filas: a | b» y «Columnas: x | y» debajo), <b>(fecha)</b>, <b>(número)</b>, <b>(desplegable)</b>, <b>(foto)</b>, <b>(firma)</b> o <b>*</b> si es obligatoria.</li>
                 <li>Para agrupar preguntas escriba una línea «Sección: Nombre» antes de ellas.</li>
               </ul>
               <pre>{EJEMPLO}</pre>
@@ -419,7 +438,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
                 {saved.data.map((s) => (
                   <li key={s.id}>
                     <div className="meta">
-                      <strong>{s.title}</strong>
+                      <strong>{s.title} {s.is_published && <span className="tag-open">Abierta</span>}</strong>
                       <small>
                         {s.questions.length} {s.questions.length === 1 ? "pregunta" : "preguntas"} · actualizada el{" "}
                         {new Date(s.updated_at).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
@@ -427,6 +446,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
                     </div>
                     <div className="acts">
                       <button className="mini" type="button" onClick={() => { setCurrentId(s.id); setManualStarted(false); showDoc({ title: s.title, desc: s.description, questions: s.questions }); }}>Abrir</button>
+                      <Link className="mini" to="/respuestas/$surveyId" params={{ surveyId: s.id }}>Respuestas</Link>
                       <button className="mini" type="button" onClick={() => downloadSurveyJson({ title: s.title, desc: s.description, questions: s.questions }, slugify(s.title))}>Descargar</button>
                       <button
                         className="mini danger"
@@ -476,6 +496,17 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
                   )}
                 </div>
                 <p className="note">La encuesta queda guardada en su cuenta y la encuentra en «Mis encuestas guardadas». También puede descargarla y abrirla luego con «Abrir archivo».</p>
+                {currentId ? (
+                  <SharePanel
+                    surveyId={currentId}
+                    title={doc.title || "Encuesta"}
+                    published={!!current?.is_published}
+                    busy={publishMut.isPending}
+                    onPublish={(next) => publishMut.mutate(next)}
+                  />
+                ) : (
+                  <p className="note">Para compartirla por enlace, código QR o correo, primero pulse «Guardar en mi cuenta».</p>
+                )}
               </>
             ) : null}
           </div>
