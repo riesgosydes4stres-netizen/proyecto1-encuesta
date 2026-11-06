@@ -263,7 +263,7 @@ function legend(ctx: Ctx, x: number, y: number) {
 export async function buildReportPdf(input: ReportInput): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   doc.setTitle(pdfSafe(`Informe - ${input.title}`));
-  doc.setAuthor("UNGRD - Seguimiento a comunidades reasentadas");
+  doc.setAuthor("UNGRD - Gestión social y productiva para familia en reasentamiento");
   doc.setSubject("Índice de Vulnerabilidad Territorial");
   doc.setCreator("Encuesta Studio");
   const f = await doc.embedFont(StandardFonts.Helvetica);
@@ -291,7 +291,7 @@ export async function buildReportPdf(input: ReportInput): Promise<Uint8Array> {
       /* logo optional */
     }
   }
-  text(ctx, "UNGRD · SEGUIMIENTO A COMUNIDADES REASENTADAS", tx, H - 40, 8, b, C.gold);
+  text(ctx, "UNGRD · GESTIÓN SOCIAL Y PRODUCTIVA PARA FAMILIA EN REASENTAMIENTO", tx, H - 40, 8, b, C.gold);
   text(ctx, "Informe de caracterización", tx, H - 64, 20, b, C.white);
   text(ctx, "y vulnerabilidad del hogar", tx, H - 86, 20, b, C.white);
   const tl = wrap(input.title, f, 10.5, W - tx - M);

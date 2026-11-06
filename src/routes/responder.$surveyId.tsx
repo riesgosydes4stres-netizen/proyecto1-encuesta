@@ -16,7 +16,7 @@ export const Route = createFileRoute("/responder/$surveyId")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(surveyQuery(params.surveyId)),
   head: ({ loaderData }) => {
     const t = loaderData?.survey ? `${loaderData.survey.title} · Responder encuesta · UNGRD` : "Encuesta no disponible · UNGRD";
-    const d = loaderData?.survey?.description || "Responda esta encuesta de seguimiento a comunidades reasentadas de la UNGRD.";
+    const d = loaderData?.survey?.description || "Responda esta encuesta de gestión social y productiva para familias en reasentamiento de la UNGRD.";
     return {
       meta: [
         { title: t },

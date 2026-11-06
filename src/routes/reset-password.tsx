@@ -8,7 +8,7 @@ import { Emblem } from "@/components/encuesta/Emblem";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Nueva contraseña · Seguimiento a comunidades reasentadas" },
+      { title: "Nueva contraseña · Gestión social y productiva para familia en reasentamiento" },
       { name: "description", content: "Cree una nueva contraseña para su cuenta del Creador de encuestas de la UNGRD." },
       { property: "og:title", content: "Nueva contraseña · UNGRD" },
       { property: "og:description", content: "Cree una nueva contraseña para su cuenta del Creador de encuestas." },

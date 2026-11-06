@@ -11,9 +11,9 @@ import { Facts, Herramientas, Mide, Pasos, Ruta, SiteFooter } from "@/components
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Seguimiento a comunidades reasentadas · UNGRD" },
+      { title: "Gestión social y productiva para familia en reasentamiento · UNGRD" },
       { name: "description", content: "Herramienta de campo para dar seguimiento a los hogares reasentados tras el sismo de 2025." },
-      { property: "og:title", content: "Seguimiento a comunidades reasentadas · UNGRD" },
+      { property: "og:title", content: "Gestión social y productiva para familia en reasentamiento · UNGRD" },
       { property: "og:description", content: "Registre, mida y reporte la situación de los hogares reasentados. Cree encuestas con IA o desde un documento." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -52,7 +52,7 @@ function Index() {
         <div className="wrap bar">
           <a className="brand" href="#top">
             <span className="mark" role="img" aria-label="Logo UNGRD" />
-            <span>Seguimiento a<br />comunidades reasentadas</span>
+            <span>Gestión social y productiva{" "}<br />para familia en reasentamiento</span>
           </a>
           <nav className="site-nav" aria-label="Principal">
             <a href="#mide">Qué mide</a>

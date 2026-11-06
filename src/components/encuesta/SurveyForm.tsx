@@ -122,7 +122,7 @@ export function SurveyForm({ doc, logoStyle, onSubmit }: Props) {
       <div className="sv-h">
         <span className="mark" role="img" aria-label="Logo UNGRD" style={logoStyle} />
         <div>
-          <small>UNGRD · Seguimiento a comunidades reasentadas</small>
+          <small>UNGRD · Gestión social y productiva para familia en reasentamiento</small>
           <h2 className="et">{doc.title}</h2>
           {doc.desc && <p className="ed">{doc.desc}</p>}
         </div>

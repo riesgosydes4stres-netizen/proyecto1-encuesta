@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system: UNGRD "Seguimiento a comunidades reasentadas".
+ * Design system: UNGRD "Gestión social y productiva para familia en reasentamiento".
  * Brand palette (navy / gold / blue / red) ported from the original app,
  * expressed as oklch tokens. shadcn tokens map onto the brand palette.
  */
@@ -111,6 +111,7 @@
 .site-header{position:sticky;top:0;z-index:20;background:oklch(0.264 0.066 255.3 / .94);backdrop-filter:blur(10px);border-bottom:1px solid oklch(1.000 0.000 0.0 / .1)}
 .bar{display:flex;align-items:center;gap:20px;min-height:68px}
 .encuesta .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--surface);font:700 1.02rem var(--font-display);line-height:1.15}
+@media (max-width:520px){.encuesta .brand{font-size:.8rem;gap:8px}.encuesta .brand br{display:none}}
 .mark{width:42px;height:42px;border-radius:50%;background:var(--logo) center/cover;flex:none;box-shadow:0 0 0 2px oklch(1.000 0.000 0.0 / .18)}
 .site-nav{margin-left:auto;display:flex;gap:6px;align-items:center}
 .site-nav a{color:oklch(0.883 0.026 261.1);text-decoration:none;padding:8px 12px;border-radius:8px;font-size:.95rem}.site-nav a:hover{color:var(--surface);background:oklch(1.000 0.000 0.0 / .08)}

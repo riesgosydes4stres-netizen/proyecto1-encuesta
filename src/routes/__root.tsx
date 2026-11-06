@@ -81,9 +81,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Seguimiento a comunidades reasentadas · UNGRD" },
+      { title: "Gestión social y productiva para familia en reasentamiento · UNGRD" },
       { name: "description", content: "Herramienta de campo para dar seguimiento a los hogares reasentados tras el sismo de 2025." },
-      { property: "og:title", content: "Seguimiento a comunidades reasentadas · UNGRD" },
+      { property: "og:title", content: "Gestión social y productiva para familia en reasentamiento · UNGRD" },
       { property: "og:description", content: "Herramienta de campo para dar seguimiento a los hogares reasentados tras el sismo de 2025." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

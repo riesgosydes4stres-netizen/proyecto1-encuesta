@@ -11,7 +11,7 @@ export function PageShell({ children, right }: { children: ReactNode; right?: Re
         <div className="wrap bar">
           <Link className="brand" to="/">
             <span className="mark" role="img" aria-label="Logo UNGRD" />
-            <span>Seguimiento a<br />comunidades reasentadas</span>
+            <span>Gestión social y productiva{" "}<br />para familia en reasentamiento</span>
           </Link>
           <nav className="site-nav" aria-label="Principal">{right}</nav>
         </div>
@@ -20,7 +20,7 @@ export function PageShell({ children, right }: { children: ReactNode; right?: Re
         <div className="wrap">{children}</div>
       </main>
       <footer className="page-foot">
-        <div className="wrap">UNGRD · Unidad Nacional para la Gestión del Riesgo de Desastres · Seguimiento a comunidades reasentadas</div>
+        <div className="wrap">UNGRD · Unidad Nacional para la Gestión del Riesgo de Desastres · Gestión social y productiva para familia en reasentamiento</div>
       </footer>
     </div>
   );
