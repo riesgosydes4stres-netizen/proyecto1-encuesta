@@ -12,7 +12,7 @@ const AuthContext = createContext<AuthState>({ user: null, name: "", ready: fals
 
 function displayName(user: User | null, profileName?: string | null): string {
   if (!user) return "";
-  const meta = user.user_metadata as Record<string, unknown>;
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   return (
     profileName ||
     (typeof meta["name"] === "string" ? meta["name"] : "") ||

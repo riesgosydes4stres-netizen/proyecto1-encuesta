@@ -35,3 +35,7 @@ use the editor.
 - Saved surveys are read and written from the browser through the generated client; owner-only RLS on `surveys` is the security boundary.
 - AI survey drafting runs only in the signed-in `generateSurveyText` server function; never call the AI from browser code.
 - Landing/creator styles are hand-written component classes in `src/styles.css` scoped under `.encuesta`; colors come from the brand tokens defined there.
+- Published surveys are readable by anyone (answer link), so every "my surveys" query must also filter by `user_id`.
+- Responses are inserted from the browser (anonymous allowed) only into published surveys; a BEFORE INSERT trigger sets the owner and caps sizes. Photo/signature data URLs live in the separate `media` column so list queries never load them; only the survey owner can read responses.
+- Vulnerability index rules (scoring, weights, levels, household-code matching) live only in `src/lib/vulnerability.ts`, covered by `src/test/vulnerability.test.ts`; UI and PDF must call it instead of re-implementing math.
+- The household report PDF is built with pdf-lib standard fonts in `src/lib/report-pdf.ts` (no DOM), so the same code can run in the browser and on the server; pass all text through `pdfSafe`.
