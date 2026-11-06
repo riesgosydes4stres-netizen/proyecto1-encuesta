@@ -28,3 +28,10 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- The survey text parser lives in `src/lib/survey-parser.js` (plain JS with a `.d.ts`) so its heuristics stay comparable with the original app; change rules there and keep `src/test/survey-parser.test.ts` passing.
+- Saved surveys are read and written from the browser through the generated client; owner-only RLS on `surveys` is the security boundary.
+- AI survey drafting runs only in the signed-in `generateSurveyText` server function; never call the AI from browser code.
+- Landing/creator styles are hand-written component classes in `src/styles.css` scoped under `.encuesta`; colors come from the brand tokens defined there.

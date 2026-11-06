@@ -1,0 +1,19 @@
+{
+  "source": "code-archive: Encuesta_APP_creador_mejorado.zip (static index.html + Cloudflare Worker proxy to Gemini)",
+  "capabilities": [
+    { "capability": "code: landing page (hero, facts, Qué mide, Territorio, Cómo funciona, herramientas, footer)", "source": "index.html", "outcome": "migrate", "status": "verified", "next_action": "-" },
+    { "capability": "code: survey creator (import .docx/.txt/.md, paste, example, manual question types, edit, form preview with validation, JSON download)", "source": "index.html inline script", "outcome": "migrate", "status": "verified", "next_action": "Import, required-question check, edit and manual creation exercised in browser; parser covered by tests" },
+    { "capability": "assets: UNGRD logo and footer image (embedded base64)", "source": "index.html", "outcome": "migrate", "status": "verified", "next_action": "-" },
+    { "capability": "assets: Imagenes/ folder (WhatsApp photos, ENCABEZADO, Fondo)", "source": "Imagenes/", "outcome": "skip", "status": "accepted", "next_action": "Not referenced by index.html" },
+    { "capability": "legacy files: js/autenticacion.js, css/estilos.css, api/gemini.js (Vercel variant)", "source": "archive", "outcome": "skip", "status": "accepted", "next_action": "Unused by index.html; superseded" },
+    { "capability": "auth identities", "source": "browser localStorage (encuesta-usuarios)", "outcome": "migrate", "status": "pending", "next_action": "Email/password + Google sign-in with email confirmation and password reset built. Old accounts existed only on each device and cannot be exported; people re-register with the same email. Signed-in flow not yet exercised (no test account available)" },
+    { "capability": "schema: profiles (name) and surveys (title, description, questions)", "source": "localStorage", "outcome": "migrate", "status": "verified", "next_action": "Tables created with RLS enabled" },
+    { "capability": "records: saved surveys", "source": "browser localStorage per device", "outcome": "migrate", "status": "accepted", "next_action": "No server export exists; users bring a downloaded .json via 'Abrir archivo (.json)'" },
+    { "capability": "authorization: survey belongs to signed-in owner", "source": "localStorage key scoped by email", "outcome": "migrate", "status": "pending", "next_action": "Owner-only RLS policies in place; save/list/delete not yet exercised while signed in" },
+    { "capability": "AI: survey generation with Gemini (gemini-3.8-flash, temperature 0.25, 4096 tokens)", "source": "cloudflare-worker/src/index.js", "outcome": "migrate", "status": "verified", "next_action": "Same Gemini model through Lovable AI; sample request returned an 8-question survey that the parser read correctly. In-app button requires sign-in" },
+    { "capability": "public endpoint: Cloudflare Worker /generate", "source": "cloudflare-worker", "outcome": "replace", "status": "accepted", "next_action": "Only caller was index.html; replaced by signed-in-only server function" },
+    { "capability": "secrets: GEMINI_API_KEY", "source": "Cloudflare secret", "outcome": "not needed", "status": "accepted", "next_action": "Revoke the old exposed key in Google AI Studio" },
+    { "capability": "cutover: GitHub Pages hosting", "source": "LEEME", "outcome": "publish in Lovable", "status": "pending", "next_action": "User publishes when ready" },
+    { "capability": "not in archive: separate 'Creador' app with responses, charts, PDF/CSV export", "source": "referenced by landing copy and RUTAS.creador", "outcome": "unavailable", "status": "pending", "next_action": "Ask user for those files if they exist" }
+  ]
+}
