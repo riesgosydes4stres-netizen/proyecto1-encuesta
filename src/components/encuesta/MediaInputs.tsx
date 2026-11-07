@@ -96,7 +96,7 @@ export function PhotoInput({ id, value, onChange }: { id: string; value: string;
   const openCamera = () => {
     const touch = window.matchMedia("(pointer: coarse)").matches;
     // Phones/tablets: the native camera app. Computers: live webcam view.
-    if (!touch && navigator.mediaDevices?.getUserMedia) setLive(true);
+    if (!touch && typeof navigator.mediaDevices?.getUserMedia === "function") setLive(true);
     else camRef.current?.click();
   };
 
