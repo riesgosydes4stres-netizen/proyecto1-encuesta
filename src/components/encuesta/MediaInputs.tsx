@@ -23,10 +23,96 @@ async function compressImage(file: File, max = 900, quality = 0.75): Promise<str
   }
 }
 
+/** Draws the current video frame to a JPEG data URL (max 900px). */
+function frameToJpeg(v: HTMLVideoElement, max = 900, quality = 0.75): string {
+  const s = Math.min(1, max / Math.max(v.videoWidth, v.videoHeight));
+  const c = document.createElement("canvas");
+  c.width = Math.round(v.videoWidth * s);
+  c.height = Math.round(v.videoHeight * s);
+  const ctx = c.getContext("2d");
+  if (!ctx) throw new Error("canvas");
+  ctx.drawImage(v, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", quality);
+}
+
+function LiveCamera({ onShot, onCancel, onFail }: { onShot: (v: string) => void; onCancel: () => void; onFail: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [ready, setReady] = useState(false);
+  const [facing, setFacing] = useState<"user" | "environment">("user");
+
+  useEffect(() => {
+    let stream: MediaStream | null = null;
+    let cancelled = false;
+    setReady(false);
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 } }, audio: false })
+      .then((s) => {
+        if (cancelled) return s.getTracks().forEach((t) => t.stop());
+        stream = s;
+        const v = videoRef.current;
+        if (v) {
+          v.srcObject = s;
+          void v.play().then(() => setReady(true));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) onFail();
+      });
+    return () => {
+      cancelled = true;
+      stream?.getTracks().forEach((t) => t.stop());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facing]);
+
+  return (
+    <div className="cam">
+      <video ref={videoRef} playsInline muted aria-label="Vista de la cámara" />
+      {!ready && <p className="cam-wait">Abriendo la cámara…</p>}
+      <div className="photo-acts">
+        <button
+          type="button"
+          className="btn navy"
+          disabled={!ready}
+          onClick={() => videoRef.current && onShot(frameToJpeg(videoRef.current))}
+        >
+          Capturar foto
+        </button>
+        <button type="button" className="btn line" onClick={() => setFacing((f) => (f === "user" ? "environment" : "user"))}>
+          Cambiar cámara
+        </button>
+        <button type="button" className="mini" onClick={onCancel}>Cancelar</button>
+      </div>
+    </div>
+  );
+}
+
 export function PhotoInput({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
   const camRef = useRef<HTMLInputElement>(null);
   const galRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [live, setLive] = useState(false);
+
+  const openCamera = () => {
+    const touch = window.matchMedia("(pointer: coarse)").matches;
+    // Phones/tablets: the native camera app. Computers: live webcam view.
+    if (!touch && navigator.mediaDevices?.getUserMedia) setLive(true);
+    else camRef.current?.click();
+  };
+
+  if (live)
+    return (
+      <div className="photo-in" id={id}>
+        <LiveCamera
+          onShot={(v) => { onChange(v); setLive(false); }}
+          onCancel={() => setLive(false)}
+          onFail={() => {
+            setLive(false);
+            toast("No se pudo abrir la cámara. Revise el permiso del navegador o cargue una foto.");
+          }}
+        />
+      </div>
+    );
 
   const onFile = async (f: File | undefined) => {
     if (!f) return;
@@ -57,10 +143,12 @@ export function PhotoInput({ id, value, onChange }: { id: string; value: string;
         </div>
       )}
       <div className="photo-acts">
-        <button type="button" className="btn navy" disabled={busy} onClick={() => camRef.current?.click()}>
+        <button type="button" className="btn navy" disabled={busy} onClick={openCamera}>
           {busy ? "Procesando…" : value ? "Tomar otra foto" : "Tomar foto"}
         </button>
-        <button type="button" className="btn line" disabled={busy} onClick={() => galRef.current?.click()}>Elegir de la galería</button>
+        <button type="button" className="btn line" disabled={busy} onClick={() => galRef.current?.click()}>
+          {value ? "Cargar otra foto" : "Cargar foto"}
+        </button>
       </div>
       <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = ""; }} />
       <input ref={galRef} type="file" accept="image/*" hidden onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = ""; }} />

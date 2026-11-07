@@ -344,6 +344,9 @@ details.guide pre{white-space:pre-wrap;font:.88rem/1.6 ui-monospace,Consolas,mon
 .sigpad canvas{display:block;width:100%;height:180px;background:var(--surface);border:1px solid var(--line);border-radius:12px;touch-action:none;cursor:crosshair}
 .sig-line{position:absolute;left:24px;right:24px;top:138px;border-top:1px solid var(--ink);opacity:.5;font-size:.75rem;color:var(--mute);padding-top:2px;pointer-events:none}
 .sig-acts{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;font-size:.88rem;color:var(--mute)}
+.cam{grid-column:1/-1;display:grid;gap:12px;justify-items:start}
+.cam video{width:100%;max-width:420px;aspect-ratio:4/3;object-fit:cover;border-radius:12px;background:var(--navy);border:1px solid var(--line)}
+.cam-wait{margin:0;font-size:.9rem;color:var(--muted-foreground)}
 @media(max-width:560px){.photo-in{grid-template-columns:1fr}}
 /* índice en el editor */
 .ix{border:1px dashed oklch(0.800 0.060 265.0);background:oklch(0.975 0.012 268.0);border-radius:12px;padding:12px 14px;display:grid;gap:10px}
