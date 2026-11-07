@@ -12,9 +12,11 @@ interface Props {
   setMode: (m: AuthMode) => void;
   onOpenCreator: () => void;
   onSignedOut: () => void;
+  accountOpen?: boolean;
+  setAccountOpen?: (open: boolean) => void;
 }
 
-export function AuthBox({ mode, setMode, onOpenCreator, onSignedOut }: Props) {
+export function AuthBox({ mode, setMode, onOpenCreator, onSignedOut, accountOpen, setAccountOpen }: Props) {
   const { user, name: userName } = useAuth();
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
@@ -33,7 +35,10 @@ export function AuthBox({ mode, setMode, onOpenCreator, onSignedOut }: Props) {
       <div>
         <h2>Hola, {userName}</h2>
         <p>Su sesión está abierta en este dispositivo.</p>
-        <PersonalInfoPanel />
+        <button className="btn ghost" type="button" aria-expanded={!!accountOpen} onClick={() => setAccountOpen?.(!accountOpen)}>
+          {accountOpen ? "Ocultar mi cuenta" : "Mi cuenta"}
+        </button>
+        {accountOpen && <PersonalInfoPanel />}
         <button className="btn gold" type="button" onClick={onOpenCreator}>
           Ir al Creador de encuestas
         </button>

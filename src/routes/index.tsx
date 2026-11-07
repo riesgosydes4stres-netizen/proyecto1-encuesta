@@ -26,6 +26,7 @@ function Index() {
   const { user } = useAuth();
   const [authMode, setAuthMode] = useState<AuthMode>("register");
   const [creatorOpen, setCreatorOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const accesoRef = useRef<HTMLElement>(null);
   const logoStyle = { "--logo": `url("${logo.url}")` } as CSSProperties;
 
@@ -63,6 +64,7 @@ function Index() {
               href="#acceso"
               onClick={() => {
                 if (!user) setAuthMode("register");
+                else setAccountOpen(true);
               }}
             >
               {user ? "Mi cuenta" : "Registrarse"}
@@ -88,7 +90,9 @@ function Index() {
                 mode={authMode}
                 setMode={setAuthMode}
                 onOpenCreator={openCreator}
-                onSignedOut={() => setCreatorOpen(false)}
+                onSignedOut={() => { setCreatorOpen(false); setAccountOpen(false); }}
+                accountOpen={accountOpen}
+                setAccountOpen={setAccountOpen}
               />
             </aside>
           </div>
