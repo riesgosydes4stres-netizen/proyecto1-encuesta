@@ -204,6 +204,19 @@ details.guide pre{white-space:pre-wrap;font:.88rem/1.6 ui-monospace,Consolas,mon
 .auth .btn{width:100%;margin-top:16px}
 .auth .linkish{background:none;border:0;color:oklch(0.883 0.026 261.1);text-decoration:underline;cursor:pointer;font:inherit;font-size:.9rem;padding:0;margin-top:10px}
 .auth .or{display:flex;align-items:center;gap:10px;color:oklch(0.855 0.034 261.0);font-size:.85rem;margin-top:16px}.auth .or::before,.auth .or::after{content:"";flex:1;height:1px;background:oklch(1.000 0.000 0.0 / .2)}
+.auth .pi{margin-top:16px;padding-top:14px;border-top:1px solid oklch(1.000 0.000 0.0 / .18)}
+.auth .pi h3{font-size:1.05rem;color:var(--gold);margin:0 0 6px}
+.auth .pi dl{margin:0;display:grid;gap:0}
+.auth .pi dl>div{display:grid;grid-template-columns:44% 1fr;gap:10px;padding:7px 0;border-bottom:1px dashed oklch(1.000 0.000 0.0 / .14);font-size:.9rem}
+.auth .pi dt{color:oklch(0.855 0.034 261.0)}
+.auth .pi dd{margin:0;color:var(--surface);font-weight:600;overflow-wrap:anywhere}
+.auth .pi dd.none{color:oklch(1.000 0.000 0.0 / .45);font-weight:400;font-style:italic}
+.auth .pi-note{font-size:.85rem!important;margin-top:10px!important}
+.auth .pi-row{display:grid;grid-template-columns:1.2fr 1fr;gap:10px}
+.auth .pi-row label{min-width:0}
+.auth select{width:100%;margin-top:6px;font:inherit;font-weight:400;color:var(--surface);background:oklch(0.000 0.000 0.0 / .32);border:1px solid oklch(1.000 0.000 0.0 / .25);border-radius:10px;padding:11px 10px}
+.auth select option{color:var(--ink);background:var(--surface)}
+.auth select:focus{outline:3px solid var(--gold);outline-offset:1px}
 .auth .btn.google{background:var(--surface);color:var(--ink);margin-top:12px}
 @media (max-width:860px){.site-nav a:not(.btn){display:none}.hero .wrap,.split,.tools,.site-footer .wrap{grid-template-columns:1fr}.hero .wrap{padding:44px 0 56px}.auth{padding:22px 20px 26px}.split>div:first-child{position:static}.facts ul{grid-template-columns:1fr 1fr}.facts li:nth-child(3){border-left:0;padding-left:0}.steps{grid-template-columns:1fr 1fr;row-gap:30px}.steps li::after{display:none}.encuesta section{padding:60px 0}.route{grid-template-columns:1fr}.link{height:60px;width:3px;margin:0 auto;background:repeating-linear-gradient(180deg,var(--blue) 0 10px,transparent 10px 20px)}.link::after{right:auto;left:50%;top:auto;bottom:-2px;border:9px solid transparent;border-top:14px solid var(--blue);border-left-color:transparent;transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.arc{animation:none;stroke-dashoffset:0}.btn{transition:none}}

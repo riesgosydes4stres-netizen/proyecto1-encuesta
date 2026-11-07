@@ -39,3 +39,4 @@ use the editor.
 - Responses are inserted from the browser (anonymous allowed) only into published surveys; a BEFORE INSERT trigger sets the owner and caps sizes. Photo/signature data URLs live in the separate `media` column so list queries never load them; only the survey owner can read responses.
 - Vulnerability index rules (scoring, weights, levels, household-code matching) live only in `src/lib/vulnerability.ts`, covered by `src/test/vulnerability.test.ts`; UI and PDF must call it instead of re-implementing math.
 - The household report PDF is built with pdf-lib standard fonts in `src/lib/report-pdf.ts` (no DOM), so the same code can run in the browser and on the server; pass all text through `pdfSafe`.
+- Account personal info lives in `public.profiles` (owner-only RLS), validated by `cleanPersonalInfo` in `src/lib/profile.ts` (tests in `src/test/profile.test.ts`); never expose it in public survey/responder routes.

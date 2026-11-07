@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -8,7 +8,12 @@ interface AuthState {
   ready: boolean;
 }
 
-const AuthContext = createContext<AuthState>({ user: null, name: "", ready: false });
+interface AuthContextValue extends AuthState {
+  /** Update the displayed name after the user edits their personal info. */
+  setProfileName: (name: string) => void;
+}
+
+const AuthContext = createContext<AuthContextValue>({ user: null, name: "", ready: false, setProfileName: () => {} });
 
 function displayName(user: User | null, profileName?: string | null): string {
   if (!user) return "";
@@ -47,7 +52,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
+  const setProfileName = useCallback((name: string) => {
+    setState((s) => (s.user ? { ...s, name: displayName(s.user, name) } : s));
+  }, []);
+
+  return <AuthContext.Provider value={{ ...state, setProfileName }}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);

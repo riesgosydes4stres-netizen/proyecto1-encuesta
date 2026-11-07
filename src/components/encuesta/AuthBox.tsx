@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
+import { PersonalInfoPanel } from "./PersonalInfoPanel";
 
 export type AuthMode = "register" | "login" | "forgot";
 
@@ -32,6 +33,7 @@ export function AuthBox({ mode, setMode, onOpenCreator, onSignedOut }: Props) {
       <div>
         <h2>Hola, {userName}</h2>
         <p>Su sesión está abierta en este dispositivo.</p>
+        <PersonalInfoPanel />
         <button className="btn gold" type="button" onClick={onOpenCreator}>
           Ir al Creador de encuestas
         </button>

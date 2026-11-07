@@ -17,20 +17,38 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          document_number: string
+          document_type: string
           id: string
+          municipality: string
           name: string
+          organization: string
+          phone: string
+          position: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          document_number?: string
+          document_type?: string
           id: string
+          municipality?: string
           name?: string
+          organization?: string
+          phone?: string
+          position?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          document_number?: string
+          document_type?: string
           id?: string
+          municipality?: string
           name?: string
+          organization?: string
+          phone?: string
+          position?: string
           updated_at?: string
         }
         Relationships: []
