@@ -116,13 +116,3 @@ export async function deleteSurvey(id: string): Promise<void> {
   const { error } = await supabase.from("surveys").delete().eq("id", id);
   if (error) throw new Error("No se pudo eliminar la encuesta.");
 }
-
-export function downloadSurveyJson(doc: SurveyDoc, slug: string) {
-  const data = { title: doc.title.trim() || "Encuesta sin título", desc: doc.desc, questions: cleanQuestions(doc.questions) };
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-  a.download = slug + ".json";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}

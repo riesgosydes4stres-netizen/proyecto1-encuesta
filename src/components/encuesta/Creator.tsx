@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EJEMPLO, iaPedido, parse, uid, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
 import { fileBaseName, readDocumentText } from "@/lib/read-document";
-import { deleteSurvey, listSurveys, saveSurvey, setPublished, surveyFromJson, surveyLink } from "@/lib/surveys";
+import { deleteSurvey, listSurveys, saveSurvey, setPublished, surveyLink } from "@/lib/surveys";
 import { deliverFile, makeSurveyBlob } from "@/lib/pdf-download";
 import { surveyFileName } from "@/lib/survey-pdf";
 import { EmailShare } from "./EmailShare";
@@ -62,7 +62,6 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
   const savedRef = useRef<HTMLDivElement>(null);
   const pasteRef = useRef<HTMLTextAreaElement>(null);
   const temaRef = useRef<HTMLTextAreaElement>(null);
-  const jsonInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const t = setTimeout(() => temaRef.current?.focus({ preventScroll: true }), 450);
@@ -258,19 +257,6 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     }
   };
 
-  const onOpenJson = async (f: File | undefined) => {
-    if (!f) return;
-    try {
-      const d = surveyFromJson(JSON.parse(await f.text()));
-      setCurrentId(null);
-      setManualStarted(false);
-      showDoc(d);
-      toast("Encuesta abierta. Pulse «Guardar en mi cuenta» para conservarla.");
-    } catch (e) {
-      toast(e instanceof Error && e.message !== "" && !(e instanceof SyntaxError) ? e.message : "El archivo no es una encuesta válida (.json).");
-    }
-  };
-
   const dropHandlers = {
     onDragEnter: (e: DragEvent) => { e.preventDefault(); setDragOn(true); },
     onDragOver: (e: DragEvent) => { e.preventDefault(); setDragOn(true); },
@@ -431,9 +417,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
           <div className="saved-panel" ref={savedRef}>
             <div className="panel-heading">
               <div><p className="lbl">Mi cuenta</p><h3>Mis encuestas guardadas</h3><p>Se guardan en su cuenta y puede abrirlas desde cualquier dispositivo.</p></div>
-              <button className="back-btn" type="button" onClick={() => jsonInputRef.current?.click()}>Abrir archivo (.json)</button>
             </div>
-            <input ref={jsonInputRef} type="file" accept=".json,application/json" hidden onChange={(e) => { void onOpenJson(e.target.files?.[0]); e.target.value = ""; }} />
             {saved.isLoading ? (
               <div className="ld"><b>Cargando sus encuestas…</b><i /></div>
             ) : saved.isError ? (
