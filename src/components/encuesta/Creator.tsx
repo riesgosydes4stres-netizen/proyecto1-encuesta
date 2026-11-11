@@ -2,9 +2,12 @@ import { useEffect, useRef, useState, type CSSProperties, type DragEvent } from 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { EJEMPLO, iaPedido, parse, slugify, uid, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
+import { EJEMPLO, iaPedido, parse, uid, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
 import { fileBaseName, readDocumentText } from "@/lib/read-document";
-import { deleteSurvey, downloadSurveyJson, listSurveys, saveSurvey, setPublished, surveyFromJson } from "@/lib/surveys";
+import { deleteSurvey, listSurveys, saveSurvey, setPublished, surveyFromJson, surveyLink } from "@/lib/surveys";
+import { deliverFile, makeSurveyBlob } from "@/lib/pdf-download";
+import { surveyFileName } from "@/lib/survey-pdf";
+import { EmailShare } from "./EmailShare";
 import { Link } from "@tanstack/react-router";
 import { SharePanel } from "./SharePanel";
 import { generateSurveyText } from "@/lib/ai.functions";
@@ -238,16 +241,20 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     toast("Instrucciones copiadas. Pégalas en tu IA y luego pega aquí la respuesta.");
   };
 
-  const onDownload = () => {
-    if (!doc || !doc.questions.some((q) => q.text.trim())) {
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const downloadPdf = async (d: SurveyDoc, link?: string) => {
+    if (!d.questions.some((q) => q.text.trim())) {
       toast("Agregue al menos una pregunta con texto.");
       return;
     }
+    setPdfBusy(true);
     try {
-      downloadSurveyJson(doc, slugify(doc.title.trim() || "Encuesta sin título"));
-      toast("Archivo generado. Puede abrirlo luego con «Abrir archivo».");
-    } catch {
-      toast("No se pudo descargar en este entorno.");
+      await deliverFile(await makeSurveyBlob({ doc: d, link }), surveyFileName(d.title));
+    } catch (e) {
+      console.error(e);
+      toast("No se pudo generar el PDF. Intente de nuevo.");
+    } finally {
+      setPdfBusy(false);
     }
   };
 
@@ -328,7 +335,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
           <span className="start-icon" aria-hidden="true">☰</span>
           <span className="start-copy">
             <strong>Mis encuestas guardadas</strong>
-            <small>Abra, descargue o elimine las encuestas de su cuenta, o abra un archivo .json.</small>
+            <small>Abra, descargue en PDF o elimine las encuestas de su cuenta.</small>
           </span>
           <span className="start-action">Ver lista <span aria-hidden="true">→</span></span>
         </button>
@@ -447,7 +454,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
                     <div className="acts">
                       <button className="mini" type="button" onClick={() => { setCurrentId(s.id); setManualStarted(false); showDoc({ title: s.title, desc: s.description, questions: s.questions }); }}>Abrir</button>
                       <Link className="mini" to="/respuestas/$surveyId" params={{ surveyId: s.id }}>Respuestas</Link>
-                      <button className="mini" type="button" onClick={() => downloadSurveyJson({ title: s.title, desc: s.description, questions: s.questions }, slugify(s.title))}>Descargar</button>
+                      <button className="mini" type="button" disabled={pdfBusy} onClick={() => void downloadPdf({ title: s.title, desc: s.description, questions: s.questions }, s.is_published ? surveyLink(s.id) : undefined)}>Descargar PDF</button>
                       <button
                         className="mini danger"
                         type="button"
@@ -488,14 +495,29 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
                   <button className="btn navy" type="button" onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
                     {saveMut.isPending ? "Guardando…" : currentId ? "Guardar cambios" : "Guardar en mi cuenta"}
                   </button>
-                  <button className="btn line" type="button" onClick={onDownload}>Descargar la encuesta (.json)</button>
+                  <button className="btn line" type="button" disabled={pdfBusy} onClick={() => void downloadPdf(doc, current?.is_published && currentId ? surveyLink(currentId) : undefined)}>
+                    {pdfBusy ? "Generando PDF…" : "Descargar PDF"}
+                  </button>
                   {mode === "edit" && (
                     <button className="btn line" type="button" onClick={() => setDoc({ ...doc, questions: [...doc.questions, { id: uid(), type: "short", text: "", req: false, sec: "", opts: [] }] })}>
                       Agregar una pregunta
                     </button>
                   )}
                 </div>
-                <p className="note">La encuesta queda guardada en su cuenta y la encuentra en «Mis encuestas guardadas». También puede descargarla y abrirla luego con «Abrir archivo».</p>
+                <div className="pa">
+                  <EmailShare
+                    key={(currentId ?? "nueva") + (current?.is_published ? "-p" : "")}
+                    prepare={() => makeSurveyBlob({ doc, link: current?.is_published && currentId ? surveyLink(currentId) : undefined })}
+                    filename={surveyFileName(doc.title)}
+                    subject={`Encuesta: ${doc.title.trim() || "Encuesta sin título"}`}
+                    body={
+                      current?.is_published && currentId
+                        ? `Le comparto la encuesta «${doc.title.trim() || "Encuesta"}» de la UNGRD.\n\nPuede responderla en línea aquí:\n${surveyLink(currentId)}\n\nTambién va el formulario en PDF para imprimir.`
+                        : `Le comparto el formulario en PDF de la encuesta «${doc.title.trim() || "Encuesta"}» de la UNGRD.`
+                    }
+                  />
+                </div>
+                <p className="note">La encuesta queda guardada en su cuenta y la encuentra en «Mis encuestas guardadas». El PDF sirve para imprimirla o enviarla por correo.</p>
                 {currentId ? (
                   <SharePanel
                     surveyId={currentId}

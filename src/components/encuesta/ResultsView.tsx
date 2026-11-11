@@ -16,6 +16,7 @@ import {
   type Answers,
 } from "@/lib/vulnerability";
 import { deliverFile, makeReportBlob } from "@/lib/pdf-download";
+import { EmailShare } from "./EmailShare";
 import { reportFileName } from "@/lib/report-pdf";
 
 export interface ResultsData {
@@ -243,6 +244,12 @@ export function ResultsView({ data, actions, emailSlot }: { data: ResultsData; a
         {pdfErr && (
           <button className="btn line" type="button" onClick={() => toast("Recargue la página e intente de nuevo.")}>¿Qué hago?</button>
         )}
+        <EmailShare
+          prepare={() => (pdf ? Promise.resolve(pdf) : makeReportBlob({ ...data, questions: visible }))}
+          filename={fileName}
+          subject={`Informe de vulnerabilidad${data.householdCode ? " · hogar " + data.householdCode : ""} · ${data.title}`}
+          body={`Le comparto el informe de caracterización y vulnerabilidad${data.householdCode ? " del hogar " + data.householdCode : ""} de la encuesta «${data.title}» (UNGRD).`}
+        />
         {actions}
       </div>
       {emailSlot}

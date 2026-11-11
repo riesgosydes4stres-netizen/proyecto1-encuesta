@@ -40,3 +40,6 @@ use the editor.
 - Vulnerability index rules (scoring, weights, levels, household-code matching) live only in `src/lib/vulnerability.ts`, covered by `src/test/vulnerability.test.ts`; UI and PDF must call it instead of re-implementing math.
 - The household report PDF is built with pdf-lib standard fonts in `src/lib/report-pdf.ts` (no DOM), so the same code can run in the browser and on the server; pass all text through `pdfSafe`.
 - Account personal info lives in `public.profiles` (owner-only RLS), validated by `cleanPersonalInfo` in `src/lib/profile.ts` (tests in `src/test/profile.test.ts`); never expose it in public survey/responder routes.
+
+- Sending PDFs by email currently goes through the user's own mail app (`EmailShare`: share sheet on phones, download + Gmail/Outlook/mailto compose on computers) because no sender domain is configured; switch to app emails only after a domain is verified.
+- The printable survey questionnaire PDF is built in `src/lib/survey-pdf.ts` (pdf-lib, reuses `pdfSafe`/`wrap` from report-pdf); surveys are no longer downloaded as .json, only opened from old .json files.

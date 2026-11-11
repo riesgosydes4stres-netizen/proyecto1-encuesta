@@ -77,7 +77,7 @@ export function pdfSafe(s: string): string {
     .join("");
 }
 
-function wrap(text: string, font: PDFFont, size: number, max: number): string[] {
+export function wrap(text: string, font: PDFFont, size: number, max: number): string[] {
   const out: string[] = [];
   for (const para of pdfSafe(text).split("\n")) {
     const words = para.split(/\s+/).filter(Boolean);

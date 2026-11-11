@@ -426,3 +426,9 @@ table.delta td.up{color:var(--red);font-weight:700}table.delta td.down{color:var
 .resp-detail{margin-top:22px}.resp-detail h3{font-size:1.4rem}
 @media(max-width:860px){.kpis{grid-template-columns:1fr 1fr}.resp-head{flex-direction:column;align-items:flex-start}}
 }
+.mail-box{flex-basis:100%;display:grid;gap:12px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--paper);max-width:640px;color:var(--ink)}
+.mail-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.mail-head strong{color:var(--navy);font-family:var(--font-display)}
+.mail-box label{display:grid;gap:6px;font-weight:600;font-size:.93rem}
+.mail-box input{font:inherit;font-weight:400;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);color:var(--ink)}
+.mail-acts{display:flex;gap:10px;flex-wrap:wrap}.mail-acts .btn{padding:10px 18px;min-height:42px;font-size:.95rem}
+.mail-note{margin:0;font-size:.88rem;color:var(--muted-foreground)}

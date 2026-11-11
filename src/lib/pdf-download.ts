@@ -1,5 +1,6 @@
 import logo from "@/assets/ungrd-logo.jpg.asset.json";
 import { buildReportPdf, type ReportInput } from "./report-pdf";
+import { buildSurveyPdf, type SurveyPdfInput } from "./survey-pdf";
 
 let logoPromise: Promise<Uint8Array | null> | null = null;
 function loadLogo(): Promise<Uint8Array | null> {
@@ -12,6 +13,12 @@ function loadLogo(): Promise<Uint8Array | null> {
 
 export async function makeReportBlob(input: Omit<ReportInput, "logo">): Promise<Blob> {
   const bytes = await buildReportPdf({ ...input, logo: await loadLogo() });
+  return new Blob([bytes as BlobPart], { type: "application/pdf" });
+}
+
+/** Printable questionnaire of a survey, with the UNGRD logo. */
+export async function makeSurveyBlob(input: Omit<SurveyPdfInput, "logo">): Promise<Blob> {
+  const bytes = await buildSurveyPdf({ ...input, logo: await loadLogo() });
   return new Blob([bytes as BlobPart], { type: "application/pdf" });
 }
 
