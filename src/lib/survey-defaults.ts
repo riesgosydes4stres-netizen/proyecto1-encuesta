@@ -1,4 +1,5 @@
 import { uid, type SurveyDoc } from "./survey-parser";
+import { withIndexDefaults } from "./vulnerability";
 
 /** Adds respondent media to new drafts without duplicating supplied fields. */
 export function withRespondentFields(doc: SurveyDoc): SurveyDoc {
@@ -12,4 +13,9 @@ export function withRespondentFields(doc: SurveyDoc): SurveyDoc {
     }
   }
   return { ...doc, questions };
+}
+
+/** Every new draft: signature + photo, index components and the household code for the cruce. */
+export function prepareNewDraft(doc: SurveyDoc): SurveyDoc {
+  return withIndexDefaults(withRespondentFields(doc));
 }

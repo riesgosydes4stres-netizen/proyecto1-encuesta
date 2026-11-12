@@ -11,6 +11,7 @@ import {
   dimLabel,
   fmt,
   hasIndexConfig,
+  isMediaType,
   levelOf,
   questionRisk,
   type Answers,
@@ -95,6 +96,20 @@ export function ResultsView({ data, actions, emailSlot }: { data: ResultsData; a
   const chartData = DIMENSIONS.map((d) => ({ name: d.label, valor: idx.dims[d.key] ?? 0, has: idx.dims[d.key] !== null }));
   const cmpData = deltas?.map((r) => ({ name: r.label, Anterior: r.prev ?? 0, Actual: r.cur ?? 0, cur: r.cur }));
   const fileName = reportFileName(data.title, data.householdCode);
+
+  const sections = useMemo(() => {
+    const m = new Map<string, { total: number; done: number }>();
+    for (const q of visible) {
+      const name = q.sec?.trim() || "General";
+      const a = isMediaType(q) ? data.media[q.id] : data.answers[q.id];
+      const row = m.get(name) ?? { total: 0, done: 0 };
+      row.total += 1;
+      if (answerText(q, a) !== "Sin respuesta") row.done += 1;
+      m.set(name, row);
+    }
+    return [...m].map(([name, r]) => ({ name: name.length > 28 ? name.slice(0, 27) + "…" : name, pct: Math.round((r.done / r.total) * 100), label: `${r.done}/${r.total}` }));
+  }, [visible, data.answers, data.media]);
+  const answered = sections.reduce((s, r) => s + Number(r.label.split("/")[0]), 0);
 
   const byDim = DIMENSIONS.map((d) => ({
     ...d,
@@ -204,6 +219,24 @@ export function ResultsView({ data, actions, emailSlot }: { data: ResultsData; a
           )}
         </div>
       </div>
+
+      {sections.length > 0 && (
+        <div className="res-card">
+          <h4>Información registrada por sección</h4>
+          <p className="res-sub">{answered} de {visible.length} preguntas con respuesta.</p>
+          <ResponsiveContainer width="100%" height={Math.max(120, sections.length * 38 + 30)}>
+            <BarChart data={sections} layout="vertical" margin={{ top: 4, right: 48, left: 8, bottom: 0 }}>
+              <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="var(--line)" />
+              <XAxis type="number" domain={[0, 100]} ticks={[0, 50, 100]} tickFormatter={(v: number) => v + "%"} tickLine={false} axisLine={false} tick={{ fill: "var(--mute)", fontSize: 12 }} />
+              <YAxis type="category" dataKey="name" width={150} tickLine={false} axisLine={false} tick={{ fill: "var(--ink)", fontSize: 12 }} />
+              <Tooltip formatter={(v: number) => v + "%"} cursor={{ fill: "var(--paper)" }} />
+              <Bar dataKey="pct" name="Respondidas" fill="var(--blue)" radius={[0, 6, 6, 0]} maxBarSize={22}>
+                <LabelList dataKey="label" position="right" style={{ fill: "var(--ink)", fontWeight: 700, fontSize: 12 }} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {byDim.length > 0 && (
         <div className="res-card">

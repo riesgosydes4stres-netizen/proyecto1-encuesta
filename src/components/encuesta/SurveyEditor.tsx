@@ -1,5 +1,5 @@
 import { TIPOS, type Dimension, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
-import { DIMENSIONS, RISK_OPTIONS, canScore, optionRisk } from "@/lib/vulnerability";
+import { DIMENSIONS, RISK_OPTIONS, canScore, optionRisk, withIndexDefaults } from "@/lib/vulnerability";
 
 const lines = (v: string) => v.split("\n").map((s) => s.trim()).filter(Boolean);
 
@@ -53,6 +53,15 @@ export function SurveyEditor({ doc, onChange }: Props) {
           aria-label="Descripción"
           placeholder="Descripción (opcional)"
         />
+      </div>
+      <div className="ix-auto">
+        <p>
+          <b>Índice de vulnerabilidad:</b> {doc.questions.filter((q) => q.dim && canScore(q)).length} preguntas suman a Vivienda, Medios de vida o SST
+          {doc.questions.some((q) => q.key) ? " · hay código del hogar para el cruce." : " · falta el código del hogar para el cruce."}
+        </p>
+        <button className="mini" type="button" onClick={() => onChange(withIndexDefaults(doc))}>
+          Asignar componentes automáticamente
+        </button>
       </div>
       {doc.questions.map((q, i) => (
         <div className="qc" key={q.id}>

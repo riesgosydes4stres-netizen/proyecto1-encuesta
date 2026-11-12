@@ -12,3 +12,5 @@
 - [x] Página de respuestas del dueño con gráficas agregadas y PDF por respuesta
 - [ ] Enviar link de la encuesta por correo desde la app (bloqueado: el usuario debe configurar su dominio de correo)
 - [ ] Enviar el PDF por correo desde la app como enlace de descarga (bloqueado: dominio de correo)
+- [x] Encuestas nuevas listas para el índice: componentes Vivienda/Medios/SST sugeridos y «Código del hogar» para el cruce; botón para asignarlos en encuestas guardadas
+- [x] Gráfica de información registrada por sección al terminar la encuesta

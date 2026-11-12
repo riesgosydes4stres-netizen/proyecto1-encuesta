@@ -432,3 +432,5 @@ table.delta td.up{color:var(--red);font-weight:700}table.delta td.down{color:var
 .mail-box input{font:inherit;font-weight:400;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);color:var(--ink)}
 .mail-acts{display:flex;gap:10px;flex-wrap:wrap}.mail-acts .btn{padding:10px 18px;min-height:42px;font-size:.95rem}
 .mail-note{margin:0;font-size:.88rem;color:var(--muted-foreground)}
+.encuesta .ix-auto{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin:0 0 14px;padding:12px 16px;border:1px dashed var(--line);border-radius:12px;background:var(--paper);color:var(--navy);font-size:.92rem}
+.encuesta .ix-auto p{margin:0;flex:1 1 280px}
