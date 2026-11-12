@@ -43,3 +43,4 @@ use the editor.
 
 - Sending PDFs by email currently goes through the user's own mail app (`EmailShare`: share sheet on phones, download + Gmail/Outlook/mailto compose on computers) because no sender domain is configured; switch to app emails only after a domain is verified.
 - The printable survey questionnaire PDF is built in `src/lib/survey-pdf.ts` (pdf-lib, reuses `pdfSafe`/`wrap` from report-pdf); surveys are neither downloaded nor opened as .json — the PDF is the only survey export.
+- Initialize new manual, imported and AI drafts through `withRespondentFields`; this adds missing signature/photo fields without altering saved surveys or parser heuristics.

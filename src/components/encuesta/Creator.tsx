@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EJEMPLO, iaPedido, parse, uid, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
 import { fileBaseName, readDocumentText } from "@/lib/read-document";
+import { withRespondentFields } from "@/lib/survey-defaults";
 import { deleteSurvey, listSurveys, saveSurvey, setPublished, surveyLink } from "@/lib/surveys";
 import { deliverFile, makeSurveyBlob } from "@/lib/pdf-download";
 import { surveyFileName } from "@/lib/survey-pdf";
@@ -68,7 +69,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     return () => clearTimeout(t);
   }, []);
 
-  const saved = useQuery({ queryKey: ["surveys", user?.id], queryFn: () => listSurveys(user!.id), enabled: !!user });
+  const saved = useQuery({ queryKey: ["surveys", user?.id], queryFn: () => user ? listSurveys(user.id) : Promise.resolve([]), enabled: !!user });
 
   const saveMut = useMutation({
     mutationFn: async () => {
@@ -129,7 +130,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
       toast("No se encontraron preguntas. Revise la guía de formato.");
       return;
     }
-    showDoc(d);
+    showDoc(withRespondentFields(d));
     if (auto) toast("Encuesta creada: " + d.questions.length + (d.questions.length === 1 ? " pregunta detectada." : " preguntas detectadas."));
   };
 
@@ -161,8 +162,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     if (p === "saved") scrollSoon(savedRef.current);
     if (p === "manual") {
       if (!manualStarted) {
-        setDoc({ title: "", desc: "", questions: [] });
-        setMode("edit");
+        showDoc(withRespondentFields({ title: "", desc: "", questions: [] }), "edit");
         setManualStarted(true);
         setCurrentId(null);
       } else if (doc && doc.questions.length) setShowPrev(true);
@@ -171,8 +171,8 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
   };
 
   const addManual = (type: QuestionType) => {
-    const base = doc ?? { title: "", desc: "", questions: [] };
-    const nq: Question = { id: uid(), type, text: "", req: false, sec: "", opts: [] };
+    const base = doc ?? withRespondentFields({ title: "", desc: "", questions: [] });
+    const nq: Question = { id: uid(), type, text: type === "signature" ? "Firma de la persona encuestada" : type === "photo" ? "Foto de la persona encuestada" : "", req: false, sec: "", opts: [] };
     if (type === "single" || type === "multi" || type === "select") nq.opts = ["Opción 1", "Opción 2"];
     if (type === "grid") {
       nq.rows = ["Fila 1", "Fila 2"];

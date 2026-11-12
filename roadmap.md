@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Incluir automáticamente firma y foto (cargar o tomar) en cada nueva encuesta, sin duplicar campos existentes
+
 - [x] Campos de firma y foto de la persona encuestada en el creador y el formulario
 - [x] Componente del índice (Vivienda / Medios de vida / SST) y nivel de riesgo por opción; pregunta "código del hogar" para el cruce
 - [x] Publicar encuesta: link público + código QR (cualquiera con el link responde, sin cuenta)
