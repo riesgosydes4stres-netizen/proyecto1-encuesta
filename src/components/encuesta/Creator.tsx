@@ -122,14 +122,13 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
       if (!auto) toast("Escriba, pegue o cargue un documento primero.");
       return;
     }
-    setManualStarted(false);
-    setCurrentId(null);
     const d = parse(t, fname);
     if (!d.questions.length) {
-      setShowPrev(false);
       toast("No se encontraron preguntas. Revise la guía de formato.");
       return;
     }
+    setManualStarted(false);
+    setCurrentId(null);
     showDoc(prepareNewDraft(d));
     if (auto) toast("Encuesta creada: " + d.questions.length + (d.questions.length === 1 ? " pregunta detectada." : " preguntas detectadas."));
   };
@@ -138,7 +137,6 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     if (!f) return;
     const fname = fileBaseName(f);
     setLoadingDoc(true);
-    setShowPrev(true);
     try {
       const t = await readDocumentText(f);
       setPaste(t);
@@ -146,7 +144,6 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
       build(t, true, fname);
     } catch (e) {
       setLoadingDoc(false);
-      setShowPrev(false);
       toast(e instanceof Error ? e.message : "No se pudo leer el documento.");
     }
   };

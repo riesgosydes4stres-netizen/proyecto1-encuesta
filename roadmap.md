@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Corregir importación manual de Word y texto: campos, opciones y tablas; carga de Word verificada en computador y celular
+
 - [x] Incluir automáticamente firma y foto (cargar o tomar) en cada nueva encuesta, sin duplicar campos existentes
 
 - [x] Campos de firma y foto de la persona encuestada en el creador y el formulario

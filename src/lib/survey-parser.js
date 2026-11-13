@@ -1,7 +1,7 @@
 /*
- * Survey text parser ported verbatim (logic-wise) from the original
- * Encuesta Studio index.html. Kept as plain JS so the heuristics stay
- * byte-for-byte comparable with the source; types live in survey-parser.d.ts.
+ * Survey text parser based on the original Encuesta Studio index.html.
+ * Word/form recognition fixes live here with regression tests;
+ * types live in survey-parser.d.ts.
  */
 
 export const TIPOS = {
@@ -19,6 +19,9 @@ export const TIPOS = {
 };
 
 export const uid = () => "q" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+const FIELD_LABEL = /^(fecha|nombre|documento|c[eé]dula|identidad|municipio|ubicaci[oó]n|direcci[oó]n|tel[eé]fono|celular|correo|edad|barrio|vereda|estado|ocupaci[oó]n|profesi[oó]n|n[uú]mero|sexo|g[eé]nero|c[oó]digo del hogar|firma|foto(?:graf[ií]a)?)\b/i;
+const cleanBlank = (s) => s.replace(/\s*[:：]?\s*[_…]{3,}\s*$/, "").replace(/\s*[:：]\s*$/, "").trim();
 
 export function parse(text, fname) {
   const L = text.replace(/\r/g, "").split("\n").map((s) => s.trim()).filter(Boolean),
@@ -81,7 +84,7 @@ export function parse(text, fname) {
                     ? "long"
                     : "short";
     }
-    if (q.type === "scale" || q.type === "short" || q.type === "long" || q.type === "date" || q.type === "number" || q.type === "grid")
+    if (q.type === "scale" || q.type === "short" || q.type === "long" || q.type === "date" || q.type === "number" || q.type === "grid" || q.type === "photo" || q.type === "signature")
       q.opts = [];
     else if (!q.opts.length) {
       q.opts = ["Opción 1", "Opción 2"];
@@ -160,6 +163,7 @@ export function parse(text, fname) {
         nx &&
         numRe.test(nx) &&
         !numRe.test(line) &&
+        !(FIELD_LABEL.test(line) && /[:：]\s*(?:[_…]{3,})?\s*$/.test(line)) &&
         !/^¿/.test(line) &&
         !/\?\s*\*?\s*$/.test(line) &&
         !(cur && optRe.test(line)) &&
@@ -180,7 +184,8 @@ export function parse(text, fname) {
       lead = true;
     }
     const isOpt = cur && optRe.test(line) && !numRe.test(line),
-      isQ = numRe.test(line) || /^¿/.test(line) || /\?\s*\*?\s*$/.test(line);
+      isQ = numRe.test(line) || /^¿/.test(line) || /\?\s*\*?\s*$/.test(line) ||
+        (FIELD_LABEL.test(line) && /[:：]\s*(?:[_…]{3,})?\s*$/.test(line));
     if (isOpt) {
       cur.opts.push(isInline(line) ? line : line.match(optRe)[1].trim());
       return;
@@ -190,6 +195,12 @@ export function parse(text, fname) {
       let t = line.replace(numRe, "").trim(),
         type = "",
         req = lead;
+      let inlineOpts = [];
+      if (isInline(t)) {
+        const box = t.search(BOX);
+        inlineOpts = splitInline(t.slice(box));
+        t = t.slice(0, box).trim();
+      }
       if (/\*\s*$/.test(t)) {
         req = true;
         t = t.replace(/\s*\*\s*$/, "");
@@ -241,7 +252,9 @@ export function parse(text, fname) {
         })
         .trim();
       if (!type && /seleccione todas|marque todas|varias opciones/i.test(t)) type = "multi";
-      cur = { id: uid(), type, text: t, req, sec: curSec, opts: [] };
+      if (!type && /^firma\b/i.test(t)) type = "signature";
+      if (!type && /^foto(?:graf[ií]a)?\b/i.test(t)) type = "photo";
+      cur = { id: uid(), type, text: cleanBlank(t), req, sec: curSec, opts: inlineOpts };
       return;
     }
     if (cur) {
@@ -295,8 +308,17 @@ export function htmlATexto(html) {
         if (x) out.push(out.length ? "Sección: " + x : x);
       } else if (t === "OL" || t === "UL") lista(c, 0);
       else if (t === "TABLE") {
-        c.querySelectorAll("tr").forEach((r) => {
-          const cs = [...r.children].map(txt);
+        const rows = [...c.querySelectorAll("tr")].map((r) => [...r.children].map(txt));
+        const formTable = rows.length > 0 && rows.every((cs) => cs.length === 2 &&
+          (FIELD_LABEL.test(cs[0]) || /^¿/.test(cs[0]) || /\?/.test(cs[0])) &&
+          (!cs[1] || /^[_…\s]+$/.test(cs[1]) || /☐|□|\[\s*\]|\(\s*\)/.test(cs[1])));
+        rows.forEach((cs) => {
+          if (formTable) {
+            n++;
+            const choices = cs[1] && !/^[_…\s]+$/.test(cs[1]) ? " " + cs[1] : "";
+            out.push(n + ". " + cleanBlank(cs[0]) + choices);
+            return;
+          }
           if (cs.some(Boolean)) out.push(cs.join(" | "));
         });
       } else if (t === "P") {
@@ -313,6 +335,8 @@ export function htmlATexto(html) {
           L2[0].length >= 8 &&
           /\s/.test(L2[0]) &&
           !/^\d/.test(L2[0]) &&
+          !/^¿/.test(L2[0]) &&
+          !(FIELD_LABEL.test(L2[0]) && /[:：]\s*(?:[_…]{3,})?\s*$/.test(L2[0])) &&
           !/[?:.]\s*$/.test(L2[0])
         )
           out.push("Sección: " + L2[0]);

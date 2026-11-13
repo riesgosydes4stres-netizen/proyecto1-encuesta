@@ -32,6 +32,7 @@ use the editor.
 ## Project rules
 
 - The survey text parser lives in `src/lib/survey-parser.js` (plain JS with a `.d.ts`) so its heuristics stay comparable with the original app; change rules there and keep `src/test/survey-parser.test.ts` passing.
+- Word import distinguishes form-field tables from matrices and keeps inline answer boxes separate from question labels; cover recognition changes in document-import tests to prevent silent loss of fields.
 - Saved surveys are read and written from the browser through the generated client; owner-only RLS on `surveys` is the security boundary.
 - AI survey drafting runs only in the signed-in `generateSurveyText` server function; never call the AI from browser code.
 - Landing/creator styles are hand-written component classes in `src/styles.css` scoped under `.encuesta`; colors come from the brand tokens defined there.
