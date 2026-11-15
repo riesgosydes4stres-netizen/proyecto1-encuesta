@@ -217,7 +217,8 @@ details.guide pre{white-space:pre-wrap;font:.88rem/1.6 ui-monospace,Consolas,mon
 .auth select{width:100%;margin-top:6px;font:inherit;font-weight:400;color:var(--surface);background:oklch(0.000 0.000 0.0 / .32);border:1px solid oklch(1.000 0.000 0.0 / .25);border-radius:10px;padding:11px 10px}
 .auth select option{color:var(--ink);background:var(--surface)}
 .auth select:focus{outline:3px solid var(--gold);outline-offset:1px}
-.auth .btn.google{background:var(--surface);color:var(--ink);margin-top:12px}
+.auth .btn.google{background:var(--surface);color:var(--ink);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px}
+.auth .btn.google .g-ico{width:20px;height:20px;flex:none}
 @media (max-width:860px){.site-nav a:not(.btn){display:none}.hero .wrap,.split,.tools,.site-footer .wrap{grid-template-columns:1fr}.hero .wrap{padding:44px 0 56px}.auth{padding:22px 20px 26px}.split>div:first-child{position:static}.facts ul{grid-template-columns:1fr 1fr}.facts li:nth-child(3){border-left:0;padding-left:0}.steps{grid-template-columns:1fr 1fr;row-gap:30px}.steps li::after{display:none}.encuesta section{padding:60px 0}.route{grid-template-columns:1fr}.link{height:60px;width:3px;margin:0 auto;background:repeating-linear-gradient(180deg,var(--blue) 0 10px,transparent 10px 20px)}.link::after{right:auto;left:50%;top:auto;bottom:-2px;border:9px solid transparent;border-top:14px solid var(--blue);border-left-color:transparent;transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.arc{animation:none;stroke-dashoffset:0}.btn{transition:none}}
 
