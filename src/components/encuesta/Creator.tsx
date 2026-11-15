@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { EJEMPLO, iaPedido, parse, uid, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
 import { fileBaseName, readDocumentText } from "@/lib/read-document";
 import { prepareNewDraft } from "@/lib/survey-defaults";
+import { documentPrompts, mergeAiDocuments } from "@/lib/ai-document";
 import { deleteSurvey, listSurveys, saveSurvey, setPublished, surveyLink } from "@/lib/surveys";
 import { deliverFile, makeSurveyBlob } from "@/lib/pdf-download";
 import { surveyFileName } from "@/lib/survey-pdf";
@@ -205,13 +206,21 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     setIaBusy(true);
     setIaMsg("Conectando con la IA… puede tardar unos segundos.");
     try {
-      const r = await generate({ data: { prompt: pedido } });
-      if ("error" in r) throw new Error(r.error);
-      const out = r.text.replace(/```[a-z]*\n?/gi, "").trim();
-      if (!out) throw new Error("La IA no devolvió texto.");
-      setPaste(out);
+      const prompts = iaDoc.trim() ? documentPrompts(iaTema, iaDoc) : [pedido];
+      const outputs: string[] = [];
+      for (const [index, prompt] of prompts.entries()) {
+        setIaMsg(`Procesando parte ${index + 1} de ${prompts.length} del contenido…`);
+        const r = await generate({ data: { prompt } });
+        if ("error" in r) throw new Error(r.error);
+        outputs.push(r.text);
+      }
+      const generated = mergeAiDocuments(outputs, iaDoc);
+      setPaste(outputs.join("\n\n"));
       setIaMsg("");
-      build(out, true);
+      setManualStarted(false);
+      setCurrentId(null);
+      showDoc(prepareNewDraft(generated));
+      toast(`Encuesta creada: ${generated.questions.length} preguntas.`);
     } catch (e) {
       const m = "No se pudo generar: " + (e instanceof Error ? e.message : "error de conexión") + ".";
       setIaMsg("⚠ " + m);

@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Corregir recorte de documentos en IA, procesar todas las partes y verificar conservación de campos y opciones
+
 - [x] Corregir importación manual de Word y texto: campos, opciones y tablas; carga de Word verificada en computador y celular
 
 - [x] Incluir automáticamente firma y foto (cargar o tomar) en cada nueva encuesta, sin duplicar campos existentes
