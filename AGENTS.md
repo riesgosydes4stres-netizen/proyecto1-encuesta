@@ -35,7 +35,6 @@ use the editor.
 - Word import distinguishes form-field tables from matrices and keeps inline answer boxes separate from question labels; cover recognition changes in document-import tests to prevent silent loss of fields.
 - Saved surveys are read and written from the browser through the generated client; owner-only RLS on `surveys` is the security boundary.
 - AI survey drafting runs only in the signed-in `generateSurveyText` server function; never call the AI from browser code.
-- AI document conversion uses ordered chunks in `ai-document.ts`, checks original field/option coverage, and rejects token-truncated responses so incomplete questionnaires are not silently accepted.
 - Landing/creator styles are hand-written component classes in `src/styles.css` scoped under `.encuesta`; colors come from the brand tokens defined there.
 - Published surveys are readable by anyone (answer link), so every "my surveys" query must also filter by `user_id`.
 - Responses are inserted from the browser (anonymous allowed) only into published surveys; a BEFORE INSERT trigger sets the owner and caps sizes. Photo/signature data URLs live in the separate `media` column so list queries never load them; only the survey owner can read responses.

@@ -351,15 +351,15 @@ export function htmlATexto(html) {
 export const IA_REGLAS =
   "Escribe una encuesta en español usando EXACTAMENTE este formato de texto plano, sin Markdown, sin comentarios y sin texto adicional antes o después:\n- La primera línea es el título.\n- Segunda línea: «Descripción: …» con una frase breve.\n- Agrupa las preguntas en secciones con una línea «Sección: Nombre» antes de cada grupo.\n- Cada pregunta va en su línea, numerada («1.») con numeración continua.\n- Las opciones van debajo, una por línea, con guion: «- Opción».\n- Sin opciones, la pregunta es de respuesta corta.\n- Al final de la pregunta puede añadir (varias) para selección múltiple, (escala) para escala del 1 al 5, (párrafo) para respuesta larga, (fecha) para un campo de fecha con calendario, (matriz) para una tabla de filas y columnas, seguida de las líneas «Filas: a | b | c» y «Columnas: x | y | z», (número) para respuestas numéricas como cantidad de miembros o edad, (desplegable) para una lista desplegable, o * si es obligatoria. Usa (desplegable) en municipios y ciudades; nombres, números de documento y direcciones van sin opciones.\n- Las preguntas de opción única o múltiple llevan entre 3 y 6 opciones.\nEjemplo:\nEncuesta de satisfacción del servicio\nDescripción: Ayúdenos a mejorar la atención a las familias.\nSección: Datos del hogar\n1. Fecha de la entrevista (fecha) *\nSección: Servicios\n2. ¿Cómo califica la atención recibida? (escala)\n3. ¿Qué servicios utilizó? (varias)\n- Agua\n- Energía\n- Salud\n4. ¿Cuál es su municipio? *\n- Paratebueno\n- Medina\n5. Cuéntenos qué debemos mejorar (párrafo)";
 
-/** Builds the AI request without silently discarding document content. */
+/** Builds the AI request text exactly like the original iaPedido(). */
 export function iaPedido(tema, doc) {
   const t = (tema || "").trim();
   if (!t && !doc) return "";
   const p = doc
-    ? "Convierte TODO el siguiente documento en una encuesta, sin resumir ni omitir información. Copia literalmente las etiquetas de sus preguntas y campos. Conserva todas las secciones, instrucciones, opciones, filas y columnas de tablas, incluso si hay menos de 3 o más de 6 opciones. No combine campos ni invente opciones. Las reglas de formato no autorizan eliminar contenido del documento." +
+    ? "Convierte el siguiente documento en una encuesta. Conserva sus preguntas y opciones y mejora la redacción solo si hace falta." +
       (t ? " Indicaciones adicionales: " + t : "") +
       "\n\nDOCUMENTO:\n" +
-      doc +
+      doc.slice(0, 30000) +
       "\n\n"
     : "Necesito esta encuesta: " + t + "\n\n";
   return p + IA_REGLAS;

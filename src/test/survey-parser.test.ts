@@ -41,9 +41,10 @@ describe("survey parser (ported from the original app)", () => {
 });
 
 describe("AI request", () => {
-  it("preserves attached document content beyond 30,000 characters", () => {
-    const source = "x".repeat(40000) + "\nÚltimo campo: revisión final";
-    expect(iaPedido("", source)).toContain(source);
+  it("truncates attached documents to 30,000 characters", () => {
+    const p = iaPedido("", "x".repeat(40000));
+    expect(p).toContain("x".repeat(30000));
+    expect(p).not.toContain("x".repeat(30001));
   });
 
   it("rejects empty prompts and prompts over 60,000 characters", () => {

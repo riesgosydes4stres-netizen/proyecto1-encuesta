@@ -30,10 +30,6 @@ export const generateSurveyText = createServerFn({ method: "POST" })
         temperature: 0.25,
         max_tokens: 4096,
       });
-      if (res.choices?.[0]?.finish_reason === "length")
-        return { error: "La respuesta de la IA se cortó antes de terminar. No se creó una encuesta incompleta; reduzca el tamaño de esta parte del documento." };
-      if (res.choices?.[0]?.finish_reason !== "stop")
-        return { error: "La IA no pudo completar esta parte del documento. No se creó una encuesta incompleta." };
       const content = res.choices?.[0]?.message?.content;
       const text = typeof content === "string" ? content.trim() : "";
       if (!text) return { error: "La IA no devolvió texto. Intente de nuevo con una descripción más concreta." };
