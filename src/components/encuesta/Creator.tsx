@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { EJEMPLO, iaPedido, parse, uid, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
 import { fileBaseName, readDocumentText } from "@/lib/read-document";
 import { prepareNewDraft } from "@/lib/survey-defaults";
+import { draftWithAi } from "@/lib/ai-survey";
 import { deleteSurvey, listSurveys, saveSurvey, setPublished, surveyLink } from "@/lib/surveys";
 import { deliverFile, makeSurveyBlob } from "@/lib/pdf-download";
 import { surveyFileName } from "@/lib/survey-pdf";
@@ -205,13 +206,15 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     setIaBusy(true);
     setIaMsg("Conectando con la IA… puede tardar unos segundos.");
     try {
-      const r = await generate({ data: { prompt: pedido } });
-      if ("error" in r) throw new Error(r.error);
-      const out = r.text.replace(/```[a-z]*\n?/gi, "").trim();
-      if (!out) throw new Error("La IA no devolvió texto.");
-      setPaste(out);
+      const result = await draftWithAi(iaTema, iaDoc,
+        (prompt) => generate({ data: { prompt } }),
+        (part, total) => setIaMsg(total > 1 ? `Procesando el documento: parte ${part} de ${total}…` : "Redactando la encuesta…"));
+      setPaste(result.text);
       setIaMsg("");
-      build(out, true);
+      setManualStarted(false);
+      setCurrentId(null);
+      showDoc(prepareNewDraft(result.doc));
+      toast(`Encuesta creada: ${result.doc.questions.length} preguntas detectadas.`);
     } catch (e) {
       const m = "No se pudo generar: " + (e instanceof Error ? e.message : "error de conexión") + ".";
       setIaMsg("⚠ " + m);
@@ -294,7 +297,7 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
             <b>{iaDocName ? "Documento adjunto: " + iaDocName : "Adjuntar un documento (opcional)"}</b>
             <span>.docx, .txt o .md · la IA lo lee y lo convierte en encuesta</span>
           </label>
-          <input type="file" id="iaFile" accept=".docx,.txt,.md,text/plain" hidden onChange={(e) => { void onIaFile(e.target.files?.[0]); e.target.value = ""; }} />
+          <input type="file" id="iaFile" accept=".docx,.txt,.md,text/plain" hidden disabled={iaBusy} onChange={(e) => { void onIaFile(e.target.files?.[0]); e.target.value = ""; }} />
           <div className="docacts">
             <button className="btn navy" type="button" onClick={onIaGo} disabled={iaBusy}>
               {iaBusy ? "Redactando la encuesta…" : "Generar con IA"}

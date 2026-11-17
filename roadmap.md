@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Corregir IA con archivos largos: sin recorte total, procesamiento por partes y detección de respuestas incompletas; archivo de 33.609 caracteres verificado con IA en sesión iniciada
+
 - [x] Corregir importación manual de Word y texto: campos, opciones y tablas; carga de Word verificada en computador y celular
 
 - [x] Incluir automáticamente firma y foto (cargar o tomar) en cada nueva encuesta, sin duplicar campos existentes

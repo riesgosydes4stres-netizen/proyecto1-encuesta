@@ -359,7 +359,7 @@ export function iaPedido(tema, doc) {
     ? "Convierte el siguiente documento en una encuesta. Conserva sus preguntas y opciones y mejora la redacción solo si hace falta." +
       (t ? " Indicaciones adicionales: " + t : "") +
       "\n\nDOCUMENTO:\n" +
-      doc.slice(0, 30000) +
+      doc +
       "\n\n"
     : "Necesito esta encuesta: " + t + "\n\n";
   return p + IA_REGLAS;

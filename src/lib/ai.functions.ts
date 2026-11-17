@@ -14,7 +14,7 @@ export function validatePrompt(input: unknown): { prompt: string } {
 
 /**
  * Replaces the old Cloudflare Worker POST /generate. Same model and settings
- * (Gemini 3.8 Flash, temperature 0.25, 4096 output tokens); signed-in users only.
+ * (Gemini 3.8 Flash, temperature 0.25); signed-in users only.
  */
 export const generateSurveyText = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -28,9 +28,10 @@ export const generateSurveyText = createServerFn({ method: "POST" })
         model: "google/gemini-3.8-flash",
         messages: [{ role: "user", content: data.prompt }],
         temperature: 0.25,
-        max_tokens: 4096,
       });
       const content = res.choices?.[0]?.message?.content;
+      if (res.choices?.[0]?.finish_reason === "length")
+        return { error: "La IA devolvió una parte incompleta. No se creó la encuesta para evitar perder preguntas; intente de nuevo." };
       const text = typeof content === "string" ? content.trim() : "";
       if (!text) return { error: "La IA no devolvió texto. Intente de nuevo con una descripción más concreta." };
       return { text };
