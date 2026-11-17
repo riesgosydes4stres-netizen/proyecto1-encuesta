@@ -22,7 +22,7 @@ export function AnswerCharts({ questions, responses }: { questions: Question[]; 
                   <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="var(--line)" />
                   <XAxis type="number" allowDecimals={false} domain={[0, Math.max(1, ...chart.rows.map((r) => r.count))]} tickLine={false} axisLine={false} tick={{ fill: "var(--mute)", fontSize: 12 }} />
                   <YAxis type="category" dataKey="name" width={115} tickFormatter={(v: string) => v.length > 17 ? v.slice(0, 16) + "…" : v} tickLine={false} axisLine={false} tick={{ fill: "var(--ink)", fontSize: 12 }} />
-                  <Tooltip cursor={{ fill: "var(--paper)" }} />
+                  <Tooltip position={{ x: 0, y: 0 }} wrapperStyle={{ maxWidth: "100%" }} contentStyle={{ whiteSpace: "normal", overflowWrap: "anywhere" }} cursor={{ fill: "var(--paper)" }} />
                   <Bar dataKey="count" name="Respuestas" fill="var(--blue)" maxBarSize={24} radius={[0, 6, 6, 0]}>
                     <LabelList dataKey="count" position="right" style={{ fill: "var(--ink)", fontWeight: 700, fontSize: 12 }} />
                   </Bar>
