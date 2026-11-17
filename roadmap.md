@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Agregar preguntas sobre servicios de la Alcaldía y conocimiento de la oferta/demanda municipal: todas las encuestas guardadas y creación manual, importada y con IA verificadas en computador/celular; envío público, lectura del dueño, gráficas y descarga PDF comprobados; 23 pruebas aprobadas.
+
 - [x] Incluir firma y carga/captura de foto en encuestas existentes, sin modificar respuestas anteriores; 24 pruebas, envío público con cámara simulada, lectura del dueño y descarga PDF verificados en computador y celular.
 
 - [x] Mostrar gráficas descriptivas en encuestas ya creadas sin modificar datos guardados; 19 pruebas y envío público/lectura del dueño verificados en computador y celular con encuesta temporal sin configuración del índice

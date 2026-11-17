@@ -1,5 +1,6 @@
 import { uid, type Question, type SurveyDoc } from "./survey-parser";
 import { withIndexDefaults } from "./vulnerability";
+import { withMunicipalQuestions } from "./municipal-questions";
 
 /** Adds respondent media to new drafts without duplicating supplied fields. */
 export function withRespondentFields(doc: SurveyDoc, fieldId: (type: "signature" | "photo") => string = uid): SurveyDoc {
@@ -28,7 +29,13 @@ export function withSavedRespondentFields(questions: Question[]): Question[] {
   }).questions;
 }
 
+/** All saved survey surfaces share the same questions without mutating historical data. */
+export function withSavedSurveyDefaults(questions: Question[]): Question[] {
+  return withMunicipalQuestions(withSavedRespondentFields(questions));
+}
+
 /** Every new draft: signature + photo, index components and the household code for the cruce. */
 export function prepareNewDraft(doc: SurveyDoc): SurveyDoc {
-  return withIndexDefaults(withRespondentFields(doc));
+  const prepared = withIndexDefaults(withRespondentFields(doc));
+  return { ...prepared, questions: withMunicipalQuestions(prepared.questions) };
 }

@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { uid, type Dimension, type Question, type QuestionType, type SurveyDoc } from "./survey-parser";
-import { withSavedRespondentFields } from "./survey-defaults";
+import { withSavedSurveyDefaults } from "./survey-defaults";
 
 export interface SavedSurvey {
   id: string;
@@ -71,7 +71,7 @@ export async function listSurveys(userId: string): Promise<SavedSurvey[]> {
     .eq("user_id", userId)
     .order("updated_at", { ascending: false });
   if (error) throw new Error("No se pudieron cargar sus encuestas.");
-  return (data ?? []).map((r) => ({ ...r, questions: withSavedRespondentFields(normalizeQuestions(r.questions)) }));
+  return (data ?? []).map((r) => ({ ...r, questions: withSavedSurveyDefaults(normalizeQuestions(r.questions)) }));
 }
 
 export async function getOwnSurvey(userId: string, id: string): Promise<SavedSurvey | null> {
@@ -82,7 +82,7 @@ export async function getOwnSurvey(userId: string, id: string): Promise<SavedSur
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error("No se pudo cargar la encuesta.");
-  return data ? { ...data, questions: withSavedRespondentFields(normalizeQuestions(data.questions)) } : null;
+  return data ? { ...data, questions: withSavedSurveyDefaults(normalizeQuestions(data.questions)) } : null;
 }
 
 export async function setPublished(id: string, published: boolean): Promise<void> {
