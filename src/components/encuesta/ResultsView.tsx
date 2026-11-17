@@ -19,6 +19,7 @@ import {
 import { deliverFile, makeReportBlob } from "@/lib/pdf-download";
 import { EmailShare } from "./EmailShare";
 import { reportFileName } from "@/lib/report-pdf";
+import { AnswerCharts } from "./AnswerCharts";
 
 export interface ResultsData {
   title: string;
@@ -262,6 +263,8 @@ export function ResultsView({ data, actions, emailSlot }: { data: ResultsData; a
           </div>
         </div>
       )}
+
+      <AnswerCharts questions={visible} responses={[data.answers]} />
 
       <div className="res-actions">
         <button

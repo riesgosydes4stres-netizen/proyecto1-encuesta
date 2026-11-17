@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Mostrar gráficas descriptivas en encuestas ya creadas sin modificar datos guardados; 19 pruebas y envío público/lectura del dueño verificados en computador y celular con encuesta temporal sin configuración del índice
+
 - [x] Corregir IA con archivos largos: sin recorte total, procesamiento por partes y detección de respuestas incompletas; archivo de 33.609 caracteres verificado con IA en sesión iniciada
 
 - [x] Corregir importación manual de Word y texto: campos, opciones y tablas; carga de Word verificada en computador y celular

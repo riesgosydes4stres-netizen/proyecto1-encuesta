@@ -435,3 +435,14 @@ table.delta td.up{color:var(--red);font-weight:700}table.delta td.down{color:var
 .mail-note{margin:0;font-size:.88rem;color:var(--muted-foreground)}
 .encuesta .ix-auto{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin:0 0 14px;padding:12px 16px;border:1px dashed var(--line);border-radius:12px;background:var(--paper);color:var(--navy);font-size:.92rem}
 .encuesta .ix-auto p{margin:0;flex:1 1 280px}
+.encuesta section.answer-charts{padding:0;margin:16px 0;min-width:0}
+.answer-charts>h3{font-size:1.4rem;margin:0 0 16px}
+.answer-charts .res-card{border-radius:8px}
+.answer-charts h4{overflow-wrap:anywhere;line-height:1.4}
+.answer-chart{width:100%;min-width:0}
+.answer-chart-values{font-size:.85rem;color:var(--mute);margin-top:8px}
+.answer-chart-values summary{cursor:pointer}
+.answer-chart-values dl{margin:8px 0 0}
+.answer-chart-values dl>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;border-bottom:1px solid var(--line);padding:6px 0}
+.answer-chart-values dt{overflow-wrap:anywhere}
+.answer-chart-values dd{margin:0;font-weight:700;color:var(--ink)}

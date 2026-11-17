@@ -10,6 +10,7 @@ import { DIMENSIONS, LEVELS, computeIndex, fmt, levelOf } from "@/lib/vulnerabil
 import type { Question } from "@/lib/survey-parser";
 import { PageShell } from "@/components/encuesta/PageShell";
 import { LevelChip, ResultsView } from "@/components/encuesta/ResultsView";
+import { AnswerCharts } from "@/components/encuesta/AnswerCharts";
 
 export const Route = createFileRoute("/respuestas/$surveyId")({
   ssr: false,
@@ -33,7 +34,10 @@ function ResponsesPage() {
   const qc = useQueryClient();
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const survey = useQuery({ queryKey: ["own-survey", surveyId, user?.id], queryFn: () => getOwnSurvey(user!.id, surveyId), enabled: !!user });
+  const survey = useQuery({ queryKey: ["own-survey", surveyId, user?.id], queryFn: () => {
+    if (!user) throw new Error("Inicie sesión para ver la encuesta.");
+    return getOwnSurvey(user.id, surveyId);
+  }, enabled: !!user });
   const responses = useQuery({ queryKey: ["responses", surveyId], queryFn: () => listResponses(surveyId), enabled: !!user && !!survey.data });
 
   const del = useMutation({
@@ -82,7 +86,7 @@ function ResponsesPage() {
   const avgIvt = avg(rows.map((x) => x.idx.ivt));
   const dimAvg = DIMENSIONS.map((d) => ({ name: d.label, valor: avg(rows.map((x) => x.idx.dims[d.key])) }));
   const dist = LEVELS.map((l) => ({ name: l.label, hogares: withIvt.filter((x) => x.idx.level?.key === l.key).length, hex: l.hex }));
-  const highShare = withIvt.length ? Math.round((withIvt.filter((x) => x.idx.ivt! >= 50).length / withIvt.length) * 100) : null;
+  const highShare = withIvt.length ? Math.round((withIvt.filter((x) => x.idx.ivt !== null && x.idx.ivt >= 50).length / withIvt.length) * 100) : null;
 
   return (
     <PageShell right={<Link className="btn gold" to="/">Mis encuestas</Link>}>
@@ -107,8 +111,9 @@ function ResponsesPage() {
             <div><small>Hogares encuestados</small><b>{rows.length}</b></div>
             <div><small>IVT promedio</small><b>{fmt(avgIvt)}</b><LevelChip score={avgIvt} /></div>
             <div><small>Hogares en nivel alto o crítico</small><b>{highShare === null ? "—" : highShare + "%"}</b></div>
-            <div><small>Última respuesta</small><b className="kpi-date">{new Date(rows[0]!.r.created_at).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}</b></div>
+            <div><small>Última respuesta</small><b className="kpi-date">{rows[0] && new Date(rows[0].r.created_at).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}</b></div>
           </div>
+          <AnswerCharts questions={questions} responses={rows.map(({ r }) => r.answers)} />
           <div className="res-grid">
             <div className="res-card">
               <h4>Promedio por componente</h4>
