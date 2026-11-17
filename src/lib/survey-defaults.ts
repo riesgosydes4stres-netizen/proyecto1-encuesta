@@ -1,18 +1,31 @@
-import { uid, type SurveyDoc } from "./survey-parser";
+import { uid, type Question, type SurveyDoc } from "./survey-parser";
 import { withIndexDefaults } from "./vulnerability";
 
 /** Adds respondent media to new drafts without duplicating supplied fields. */
-export function withRespondentFields(doc: SurveyDoc): SurveyDoc {
+export function withRespondentFields(doc: SurveyDoc, fieldId: (type: "signature" | "photo") => string = uid): SurveyDoc {
   const questions = [...doc.questions];
   for (const field of [
     { type: "signature" as const, text: "Firma de la persona encuestada" },
     { type: "photo" as const, text: "Foto de la persona encuestada" },
   ]) {
     if (!questions.some((q) => q.type === field.type)) {
-      questions.push({ id: uid(), ...field, req: false, sec: "Firma y fotografía", opts: [] });
+      questions.push({ id: fieldId(field.type), ...field, req: false, sec: "Firma y fotografía", opts: [] });
     }
   }
   return { ...doc, questions };
+}
+
+/** Read-time compatibility for saved surveys; stable IDs keep media readable without rewriting old data. */
+export function withSavedRespondentFields(questions: Question[]): Question[] {
+  const ids = new Set(questions.map((q) => q.id));
+  return withRespondentFields({ title: "", desc: "", questions }, (type) => {
+    const base = `respondent-${type}`;
+    let id = base;
+    let suffix = 1;
+    while (ids.has(id)) id = `${base}-${suffix++}`;
+    ids.add(id);
+    return id;
+  }).questions;
 }
 
 /** Every new draft: signature + photo, index components and the household code for the cruce. */

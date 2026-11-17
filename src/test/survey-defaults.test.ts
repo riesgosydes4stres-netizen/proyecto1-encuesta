@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withRespondentFields } from "@/lib/survey-defaults";
+import { withRespondentFields, withSavedRespondentFields } from "@/lib/survey-defaults";
 import type { SurveyDoc } from "@/lib/survey-parser";
 
 describe("Respondent fields in new surveys", () => {
@@ -22,5 +22,36 @@ describe("Respondent fields in new surveys", () => {
       { id: "photo", type: "photo", text: "Foto", req: false, opts: [] },
     ] };
     expect(withRespondentFields(withRespondentFields(original))).toEqual(original);
+  });
+
+  it("adds optional signature and photo to existing surveys without changing their questions", () => {
+    const original: SurveyDoc["questions"] = [
+      { id: "old", type: "short", text: "Nombre", req: true, opts: [] },
+    ];
+    const result = withSavedRespondentFields(original);
+    expect(result.slice(0, 1)).toEqual(original);
+    expect(original).toHaveLength(1);
+    expect(result.slice(1).map((q) => [q.type, q.req])).toEqual([["signature", false], ["photo", false]]);
+  });
+
+  it("keeps saved media IDs stable across owner and public reads, without collisions", () => {
+    const original: SurveyDoc["questions"] = [
+      { id: "respondent-signature", type: "short", text: "Código", req: false, opts: [] },
+    ];
+    const first = withSavedRespondentFields(original);
+    expect(withSavedRespondentFields(original)).toEqual(first);
+    expect(first.find((q) => q.type === "signature")?.id).toBe("respondent-signature-1");
+    expect(new Set(first.map((q) => q.id)).size).toBe(first.length);
+    expect(withSavedRespondentFields(first)).toEqual(first);
+  });
+
+  it("preserves existing signatures and adds only a missing photo", () => {
+    const original: SurveyDoc["questions"] = [
+      { id: "signed", type: "signature", text: "Firma", req: true, opts: [] },
+    ];
+    const result = withSavedRespondentFields(original);
+    expect(result[0]).toEqual(original[0]);
+    expect(result.filter((q) => q.type === "signature")).toHaveLength(1);
+    expect(result.filter((q) => q.type === "photo")).toHaveLength(1);
   });
 });

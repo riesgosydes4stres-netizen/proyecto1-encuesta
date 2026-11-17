@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { normalizeQuestions } from "./surveys";
+import { withSavedRespondentFields } from "./survey-defaults";
 
 /** Public read of a published survey (title, description, questions) for the answer page. */
 export const getPublicSurvey = createServerFn({ method: "GET" })
@@ -39,7 +40,7 @@ export const getPublicSurvey = createServerFn({ method: "GET" })
         title: row.title,
         description: row.description,
         ownerId: row.user_id,
-        questions: normalizeQuestions(row.questions),
+        questions: withSavedRespondentFields(normalizeQuestions(row.questions)),
       },
     };
   });
