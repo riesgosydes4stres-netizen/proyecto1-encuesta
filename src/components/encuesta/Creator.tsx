@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EJEMPLO, iaPedido, parse, uid, type Question, type QuestionType, type SurveyDoc } from "@/lib/survey-parser";
 import { fileBaseName, readDocumentText } from "@/lib/read-document";
-import { prepareNewDraft } from "@/lib/survey-defaults";
+import { prepareNewDraft, withMediaLast } from "@/lib/survey-defaults";
 import { draftWithAi } from "@/lib/ai-survey";
 import { deleteSurvey, listSurveys, saveSurvey, setPublished, surveyLink } from "@/lib/surveys";
 import { deliverFile, makeSurveyBlob } from "@/lib/pdf-download";
@@ -41,7 +41,8 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
   const qc = useQueryClient();
   const generate = useServerFn(generateSurveyText);
 
-  const [doc, setDoc] = useState<SurveyDoc | null>(null);
+  const [doc, setDocState] = useState<SurveyDoc | null>(null);
+  const setDoc = (next: SurveyDoc) => setDocState({ ...next, questions: withMediaLast(next.questions) });
   const [mode, setMode] = useState<"form" | "edit">("form");
   const [showPrev, setShowPrev] = useState(false);
   const [loadingDoc, setLoadingDoc] = useState(false);
@@ -179,7 +180,8 @@ export function Creator({ onClose, logoStyle }: { onClose: () => void; logoStyle
     showDoc({ ...base, questions: [...base.questions, nq] }, "edit");
     setTimeout(() => {
       const fields = prevRef.current?.querySelectorAll<HTMLInputElement>('[data-q="text"]');
-      fields?.[fields.length - 1]?.focus({ preventScroll: true });
+      const index = withMediaLast([...base.questions, nq]).findIndex((q) => q.id === nq.id);
+      fields?.[index]?.focus({ preventScroll: true });
     }, 250);
   };
 

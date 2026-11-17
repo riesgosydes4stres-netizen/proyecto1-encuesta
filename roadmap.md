@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Mantener firma y foto al final en encuestas existentes y nuevas, incluso al agregar o editar preguntas; 22 pruebas aprobadas y orden comprobado en ambas encuestas guardadas y al agregar preguntas manuales, en computador y celular.
+
 - [x] Agregar preguntas sobre servicios de la Alcaldía y conocimiento de la oferta/demanda municipal: todas las encuestas guardadas y creación manual, importada y con IA verificadas en computador/celular; envío público, lectura del dueño, gráficas y descarga PDF comprobados; 23 pruebas aprobadas.
 
 - [x] Incluir firma y carga/captura de foto en encuestas existentes, sin modificar respuestas anteriores; 24 pruebas, envío público con cámara simulada, lectura del dueño y descarga PDF verificados en computador y celular.

@@ -1,8 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { withRespondentFields, withSavedRespondentFields } from "@/lib/survey-defaults";
+import { prepareNewDraft, withMediaLast, withRespondentFields, withSavedRespondentFields, withSavedSurveyDefaults } from "@/lib/survey-defaults";
 import type { SurveyDoc } from "@/lib/survey-parser";
 
 describe("Respondent fields in new surveys", () => {
+  it.each(["manual", "imported", "AI", "saved"])("keeps signature and photo last in %s surveys, after municipal questions", (source) => {
+    const questions: SurveyDoc["questions"] = [
+      { id: "photo", type: "photo", text: "Foto", req: false, opts: [] },
+      { id: "one", type: "short", text: "Primera", req: true, opts: [] },
+      { id: "signature", type: "signature", text: "Firma", req: true, opts: [] },
+      { id: "two", type: "short", text: "Segunda", req: false, opts: [] },
+    ];
+    const before = structuredClone(questions);
+    const result = source === "saved" ? withSavedSurveyDefaults(questions) : prepareNewDraft({ title: source, desc: "", questions }).questions;
+    expect(result.slice(-2)).toEqual([questions[2], questions[0]]);
+    expect(result.findIndex((q) => q.id === "one")).toBeLessThan(result.findIndex((q) => q.id === "two"));
+    expect(result.findIndex((q) => q.id === "municipal-awareness")).toBeLessThan(result.length - 2);
+    expect(questions).toEqual(before);
+  });
+
+  it("keeps new or edited ordinary questions before media without losing multiple fields", () => {
+    const questions: SurveyDoc["questions"] = [
+      { id: "s1", type: "signature", text: "Firma", req: true, opts: [] },
+      { id: "p1", type: "photo", text: "Foto", req: false, opts: [] },
+      { id: "s2", type: "signature", text: "Otra firma", req: false, opts: [] },
+      { id: "new", type: "short", text: "Nueva pregunta", req: false, opts: [] },
+    ];
+    const result = withMediaLast(questions);
+    expect(result.map((q) => q.id)).toEqual(["new", "s1", "s2", "p1"]);
+    expect(withMediaLast(result)).toEqual(result);
+    expect(questions.map((q) => q.id)).toEqual(["s1", "p1", "s2", "new"]);
+  });
+
   it("includes a signature field even in an empty manual draft", () => {
     const doc = withRespondentFields({ title: "", desc: "", questions: [] });
     expect(doc.questions.filter((q) => q.type === "signature")).toHaveLength(1);

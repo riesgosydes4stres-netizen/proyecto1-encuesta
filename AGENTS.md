@@ -48,3 +48,4 @@ use the editor.
 - The printable survey questionnaire PDF is built in `src/lib/survey-pdf.ts` (pdf-lib, reuses `pdfSafe`/`wrap` from report-pdf); surveys are neither downloaded nor opened as .json — the PDF is the only survey export.
 - Initialize new manual, imported and AI drafts through `prepareNewDraft` (signature/photo via `withRespondentFields`, index components + household code via `withIndexDefaults` in vulnerability.ts); it only fills gaps and never touches saved surveys or parser heuristics.
 - Apply `withSavedSurveyDefaults` on owner and public survey reads: append missing media and municipal questions with stable collision-free IDs without rewriting historical responses or inferring index configuration; new drafts use the same municipal helper.
+- Normalize question order with `withMediaLast` after draft defaults, saved-read defaults and every creator edit so media stay at the end without changing question IDs or historical answers.
